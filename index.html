@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>カニ・クリーム・コロッケ アセット調整ツール</title>
+<title>カニ・クリーム・コロッケ 料理プレビュー調整ツール</title>
 <style>
 :root{--bg:#f5f2eb;--panel:#fffdf8;--ink:#2d2925;--muted:#716b63;--line:#d9d2c7;--accent:#e65a2f;--accent2:#f4b23a;--blue:#2e79c7;--green:#459b62;--shadow:0 10px 30px #382d2117}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;overflow:hidden}
@@ -18,7 +18,7 @@ button,input,select{font:inherit} button{cursor:pointer;border:1px solid var(--l
 <body class="mode-compose">
 <div class="app">
   <header class="topbar">
-    <div class="brand">🦀 アセット調整ツール</div>
+    <div class="brand">🦀 料理プレビュー調整ツール</div>
     <div class="tabs"><button class="tab active" id="tabCompose">① 料理プレビュー</button><button class="tab" id="tabCrop">② 切り抜き補助</button></div>
     <div class="spacer"></div>
     <button id="saveProject">プロジェクト保存</button><button id="loadProjectBtn">読込</button><input id="loadProject" type="file" accept="application/json" hidden>
@@ -46,6 +46,24 @@ button,input,select{font:inherit} button{cursor:pointer;border:1px solid var(--l
         <div class="section"><h4>自動検出候補</h4><div id="detectedList" class="asset-grid"></div></div>
       </div>
       <div class="scroll composer-only">
+        <div class="section">
+          <h4>原案プレビュー</h4>
+          <div class="row"><label>プリセット</label><select id="presetSelect"></select></div>
+          <button id="loadPreset" class="primary" style="width:100%;margin-bottom:8px">原案を表示</button>
+          <div style="height:1px;background:var(--line);margin:8px 0"></div>
+          <div class="row"><label>液体</label><select id="comboLiquid">
+            <option value="liquid_cream">クリーム</option><option value="liquid_yogurt">ヨーグルト</option><option value="liquid_mayo">マヨネーズ</option><option value="liquid_mystery">謎の液体</option><option value="liquid_pink">ピンク系</option>
+          </select></div>
+          <div class="row"><label>具</label><select id="comboIngredient">
+            <option value="ingredient_crab">カニ</option><option value="ingredient_kanikama">カニカマ</option><option value="ingredient_kombu">昆布</option><option value="">なし</option>
+          </select></div>
+          <div class="row"><label>仕上げ</label><select id="comboFinish"><option value="normal">通常</option><option value="burnt">焦げ目</option></select></div>
+          <div class="row"><label>追加</label><select id="comboExtra">
+            <option value="">なし</option><option value="legs">足</option><option value="dj">DJグラサン</option><option value="dj_full">DJセット</option>
+          </select></div>
+          <button id="applyCombo" class="good" style="width:100%">この組み合わせを生成</button>
+          <div style="font-size:10px;color:var(--muted);margin-top:7px">生成後はレイヤーを直接ドラッグし、右側で位置・大きさ・角度を調整できます。</div>
+        </div>
         <div class="section"><div class="drop" id="assetDrop">ここへ画像をドロップして素材追加<br><span style="font-size:10px">PNG / WebP 推奨</span></div><input id="assetUpload" type="file" accept="image/*" multiple hidden><button id="assetUploadBtn" style="width:100%;margin-top:6px">素材画像を追加</button></div>
         <div id="assetLibrary" class="asset-grid"></div>
       </div>
@@ -96,16 +114,48 @@ button,input,select{font:inherit} button{cursor:pointer;border:1px solid var(--l
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const canvas=$('#mainCanvas'), ctx=canvas.getContext('2d',{willReadFrequently:true}), wrap=$('#canvasWrap');
-const state={mode:'crop',sources:[],source:null,view:{scale:1,x:0,y:0},tool:'rect',selection:null,poly:[],free:[],drawing:false,detected:[],assets:[],layers:[],selectedLayer:null,recipes:{},dish:{w:768,h:768,bg:'checker'},dragLayer:null,projectVersion:1};
-const builtins=[['croquette_parts.png','コロッケ本体・皿・焦げ等'],['fillings.png','液体・具材'],['specials.png','足・DJグッズ・演出']];
-function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1600)}
-function status(t){$('#status').textContent=t}
-function resize(){const r=wrap.getBoundingClientRect();canvas.width=Math.max(1,Math.floor(r.width*devicePixelRatio));canvas.height=Math.max(1,Math.floor(r.height*devicePixelRatio));draw()}
-addEventListener('resize',resize);
-function imgFrom(url){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url})}
-async function init(){for(const [f,name] of builtins){const img=await imgFrom('assets/'+f);state.sources.push({id:'src_'+crypto.randomUUID(),name,file:f,img,url:'assets/'+f});} state.source=state.sources[0];renderSources();fitSource();resize();status('内蔵素材を読み込みました')}
+const state={mode:'compose',sources:[],source:null,view:{scale:1,x:0,y:0},tool:'rect',selection:null,poly:[],free:[],drawing:false,detected:[],assets:[],layers:[],selectedLayer:null,recipes:{},dish:{w:768,h:768,bg:'checker'},dragLayer:null,projectVersion:2};
+const sourceBuiltins=[
+  ['croquette_parts_source.png','コロッケ本体・皿・焦げ等'],
+  ['filling_parts_source.png','液体・具材'],
+  ['special_parts_source.png','足・DJグッズ・演出']
+];
+const assetDefs=[
+  ['plate','plate.png','皿','base'],['croquette_frame','croquette_frame.png','コロッケ断面枠','base'],['croquette_frame_alt','croquette_frame_alt.png','コロッケ断面枠B','base'],['croquette_whole','croquette_whole.png','通常コロッケ','base'],
+  ['liquid_cream','liquid_cream.png','クリーム','liquid'],['liquid_yogurt','liquid_yogurt.png','ヨーグルト','liquid'],['liquid_mayo','liquid_mayo.png','マヨネーズ','liquid'],['liquid_mystery','liquid_mystery.png','謎の液体','liquid'],['liquid_pink','liquid_pink.png','ピンク系液体','liquid'],
+  ['ingredient_crab','ingredient_crab.png','カニ身','ingredient'],['ingredient_kanikama','ingredient_kanikama.png','カニカマ','ingredient'],['ingredient_kombu','ingredient_kombu.png','昆布','ingredient'],
+  ['burn_overlay','burn_overlay.png','焦げ目','finish'],['sparkle','sparkle.png','キラキラ','effect'],['steam','steam.png','湯気','effect'],
+  ['leg_left','leg_left.png','左足','special'],['leg_right','leg_right.png','右足','special'],['dj_glasses','dj_glasses.png','DJグラサン','special'],['dj_glasses_gold','dj_glasses_gold.png','金DJグラサン','special'],['headphones','headphones.png','ヘッドホン','special'],['dj_deck','dj_deck.png','DJセット','special']
+];
+function mkLayer(assetId,name,x,y,scale=1,rot=0,opacity=1,flip=false){return{id:'layer_'+crypto.randomUUID(),assetId,name,x,y,scale,rot,opacity,flip,visible:true}}
+function baseLayers(liquid='liquid_cream',ingredient='ingredient_crab'){
+  const ls=[mkLayer('plate','皿',384,590,.72),mkLayer(liquid,'液体',384,405,.50)];
+  if(ingredient)ls.push(mkLayer(ingredient,'具',384,410,.42));
+  ls.push(mkLayer('croquette_frame','断面枠',384,405,.80));
+  return ls;
+}
+function buildCombo(liquid,ingredient,finish,extra){
+  const ls=baseLayers(liquid,ingredient);
+  if(finish==='burnt')ls.push(mkLayer('burn_overlay','焦げ目',384,405,.82,0,.66));
+  if(extra==='legs')ls.unshift(mkLayer('leg_left','左足',306,570,.46,-8),mkLayer('leg_right','右足',462,570,.46,8));
+  else if(extra==='dj'||extra==='dj_full'){ls.push(mkLayer('dj_glasses','DJグラサン',384,320,.58));if(extra==='dj_full'){ls.push(mkLayer('headphones','ヘッドホン',384,395,.68));ls.unshift(mkLayer('dj_deck','DJセット',384,640,.76));}}
+  return ls;
+}
+function createOriginalRecipes(){
+  const defs=[['01_カニ＋クリーム','liquid_cream','ingredient_crab','normal',''],['02_カニカマ＋クリーム','liquid_cream','ingredient_kanikama','normal',''],['03_昆布＋謎の液体','liquid_mystery','ingredient_kombu','normal',''],['04_カニ＋マヨ＋焦げ','liquid_mayo','ingredient_crab','burnt',''],['05_カニカマ＋ヨーグルト＋逃走','liquid_yogurt','ingredient_kanikama','normal','legs'],['06_カニ＋クリーム＋DJ','liquid_cream','ingredient_crab','normal','dj_full']];
+  for(const [name,l,i,f,e] of defs)state.recipes[name]={name,dish:{...state.dish},layers:buildCombo(l,i,f,e)};
+}
+async function init(){
+  for(const [f,name] of sourceBuiltins){const img=await imgFrom('sources/'+f);state.sources.push({id:'src_'+crypto.randomUUID(),name,file:f,img,url:'sources/'+f});}
+  for(const [id,file,name,category] of assetDefs){const img=await imgFrom('assets/'+file);const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);const data=c.toDataURL('image/png');state.assets.push({id,name,category,url:'assets/'+file,img,w:img.naturalWidth,h:img.naturalHeight,pngDataUrl:data,builtin:true});}
+  state.source=state.sources[0];createOriginalRecipes();renderSources();renderAssets();renderLayers();renderRecipes();renderPresetSelect();resize();setMode('compose');loadRecipeByName('01_カニ＋クリーム');status('原案を読み込みました。料理プレビューが主機能、切り抜きは補助機能です');
+}
 function setMode(m){state.mode=m;document.body.className='mode-'+m;$('#tabCrop').classList.toggle('active',m==='crop');$('#tabCompose').classList.toggle('active',m==='compose');$('#canvasTitle').textContent=m==='crop'?'切り抜きプレビュー':'料理プレビュー';$('#hint').textContent=m==='crop'?toolHint():'素材をクリックして追加 / レイヤーをドラッグして移動';if(m==='compose') fitDish(); else fitSource();draw()}
 $('#tabCrop').onclick=()=>setMode('crop');$('#tabCompose').onclick=()=>setMode('compose');
+function renderPresetSelect(){const s=$('#presetSelect');if(!s)return;s.innerHTML='';for(const name of Object.keys(state.recipes)){const o=document.createElement('option');o.value=name;o.textContent=name;s.appendChild(o)}}
+function loadRecipeByName(name){const r=state.recipes[name];if(!r)return;state.dish={...r.dish};state.layers=r.layers.map(L=>({...L,id:'layer_'+crypto.randomUUID()}));state.selectedLayer=state.layers.length?state.layers.length-1:null;$('#dishW').value=state.dish.w;$('#dishH').value=state.dish.h;$('#bgMode').value=state.dish.bg;$('#recipeName').value=name;renderLayers();syncLayerEditor();fitDish();draw()}
+$('#loadPreset').onclick=()=>loadRecipeByName($('#presetSelect').value);
+$('#applyCombo').onclick=()=>{state.layers=buildCombo($('#comboLiquid').value,$('#comboIngredient').value,$('#comboFinish').value,$('#comboExtra').value);state.selectedLayer=state.layers.length-1;$('#recipeName').value='custom_'+Date.now();renderLayers();syncLayerEditor();fitDish();draw();toast('組み合わせ原案を生成しました')};
 function renderSources(){const box=$('#sourceList');box.innerHTML='';state.sources.forEach(s=>{const d=document.createElement('div');d.className='src-item'+(s===state.source?' active':'');d.innerHTML=`<img class="thumb" src="${s.img.src}"><div class="meta"><b>${esc(s.name)}</b><span>${s.img.naturalWidth}×${s.img.naturalHeight}</span></div>`;d.onclick=()=>{state.source=s;state.selection=null;state.poly=[];state.free=[];renderSources();fitSource();draw()};box.appendChild(d)})}
 function fitSource(){if(!state.source)return;const r=wrap.getBoundingClientRect(),im=state.source.img;const s=Math.min((r.width-30)/im.naturalWidth,(r.height-30)/im.naturalHeight);state.view.scale=s;state.view.x=(r.width-im.naturalWidth*s)/2;state.view.y=(r.height-im.naturalHeight*s)/2;updateZoomUI();draw()}
 function fitDish(){const r=wrap.getBoundingClientRect();const s=Math.min((r.width-40)/state.dish.w,(r.height-40)/state.dish.h);state.view.scale=s;state.view.x=(r.width-state.dish.w*s)/2;state.view.y=(r.height-state.dish.h*s)/2;updateZoomUI();draw()}
@@ -155,9 +205,9 @@ function hitLayer(x,y){for(let i=state.layers.length-1;i>=0;i--){const L=state.l
 $('#dishW').onchange=e=>{state.dish.w=+e.target.value;fitDish()};$('#dishH').onchange=e=>{state.dish.h=+e.target.value;fitDish()};$('#bgMode').onchange=e=>{state.dish.bg=e.target.value;draw()};$('#resetDish').onclick=()=>{state.layers=[];state.selectedLayer=null;renderLayers();syncLayerEditor();draw()};
 function renderDishToCanvas(){const c=document.createElement('canvas');c.width=state.dish.w;c.height=state.dish.h;const g=c.getContext('2d');if(state.dish.bg==='white'){g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height)}else if(state.dish.bg==='dark'){g.fillStyle='#292625';g.fillRect(0,0,c.width,c.height)}for(const L of state.layers){const a=assetById(L.assetId);if(!a||!L.visible)continue;g.save();g.globalAlpha=L.opacity;g.translate(L.x,L.y);g.rotate(L.rot*Math.PI/180);g.scale(L.flip?-L.scale:L.scale,L.scale);g.drawImage(a.img,-a.w/2,-a.h/2,a.w,a.h);g.restore()}return c}
 $('#exportPng').onclick=()=>downloadCanvas(renderDishToCanvas(),($('#recipeName').value||'dish_preview')+'.png');
-$('#saveRecipe').onclick=()=>{const name=($('#recipeName').value||'').trim();if(!name)return toast('パターン名を入力してください');state.recipes[name]={name,dish:{...state.dish},layers:state.layers.map(L=>({...L}))};renderRecipes();toast('パターンを保存しました')};
+$('#saveRecipe').onclick=()=>{const name=($('#recipeName').value||'').trim();if(!name)return toast('パターン名を入力してください');state.recipes[name]={name,dish:{...state.dish},layers:state.layers.map(L=>({...L}))};renderRecipes();renderPresetSelect();toast('パターンを保存しました')};
 function renderRecipes(){const s=$('#recipeList'),cur=s.value;s.innerHTML='<option value="">保存済みパターン...</option>';for(const name of Object.keys(state.recipes)){const o=document.createElement('option');o.value=name;o.textContent=name;s.appendChild(o)}s.value=cur}
-$('#recipeList').onchange=e=>{const r=state.recipes[e.target.value];if(!r)return;state.dish={...r.dish};state.layers=r.layers.map(L=>({...L}));state.selectedLayer=state.layers.length?state.layers.length-1:null;$('#dishW').value=state.dish.w;$('#dishH').value=state.dish.h;$('#bgMode').value=state.dish.bg;renderLayers();syncLayerEditor();fitDish();draw()};
+$('#recipeList').onchange=e=>loadRecipeByName(e.target.value);
 $('#assetUploadBtn').onclick=()=>$('#assetUpload').click();$('#assetUpload').onchange=e=>loadAssetFiles(e.target.files);const drop=$('#assetDrop');['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.ondrop=e=>loadAssetFiles(e.dataTransfer.files);async function loadAssetFiles(files){for(const f of files){const url=URL.createObjectURL(f),img=await imgFrom(url);state.assets.push({id:'asset_'+crypto.randomUUID(),name:f.name.replace(/\.[^.]+$/,''),url,img,w:img.naturalWidth,h:img.naturalHeight,file:f})}renderAssets();toast(files.length+'個の素材を追加')}
 function autoDetectComponents(){if(!state.source)return;status('自動分割中...');const im=state.source.img,c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);const dat=g.getImageData(0,0,c.width,c.height).data,W=c.width,H=c.height,thr=+$('#alphaThreshold').value;const ds=3,w=Math.ceil(W/ds),h=Math.ceil(H/ds),mask=new Uint8Array(w*h);for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){let a=0;for(let sy=0;sy<ds;sy++)for(let sx=0;sx<ds;sx++){const x=Math.min(W-1,xx*ds+sx),y=Math.min(H-1,yy*ds+sy);a=Math.max(a,dat[(y*W+x)*4+3])}if(a>thr)mask[yy*w+xx]=1}const seen=new Uint8Array(w*h),comps=[];const qx=new Int32Array(w*h),qy=new Int32Array(w*h);for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){let idx=yy*w+xx;if(!mask[idx]||seen[idx])continue;let qs=0,qe=0;qx[qe]=xx;qy[qe++]=yy;seen[idx]=1;let minx=xx,maxx=xx,miny=yy,maxy=yy,count=0;while(qs<qe){const x=qx[qs],y=qy[qs++];count++;minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);const ns=[[x+1,y],[x-1,y],[x,y+1],[x,y-1]];for(const [nx,ny] of ns){if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(mask[ni]&&!seen[ni]){seen[ni]=1;qx[qe]=nx;qy[qe++]=ny}}}if(count>40)comps.push({x:minx*ds,y:miny*ds,w:(maxx-minx+1)*ds,h:(maxy-miny+1)*ds,count})}comps.sort((a,b)=>b.count-a.count);state.detected=comps.slice(0,60);renderDetected();status('自動分割完了: '+state.detected.length+'候補')}
 $('#autoDetect').onclick=autoDetectComponents;function renderDetected(){const box=$('#detectedList');box.innerHTML='';state.detected.forEach((b,i)=>{const c=document.createElement('canvas');c.width=b.w;c.height=b.h;c.getContext('2d').drawImage(state.source.img,b.x,b.y,b.w,b.h,0,0,b.w,b.h);const d=document.createElement('div');d.className='asset-card';d.innerHTML=`<img src="${c.toDataURL()}"><b>候補 ${i+1}</b>`;d.onclick=()=>{state.selection={type:'rect',x:b.x,y:b.y,w:b.w,h:b.h};$('#assetName').value='asset_'+(i+1);updateSelectionInfo();draw()};box.appendChild(d)})}
