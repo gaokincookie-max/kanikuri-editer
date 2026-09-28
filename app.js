@@ -1,97 +1,4 @@
-<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>カニ・クリーム・コロッケ アセット調整ツール</title>
-<style>
-:root{--bg:#f5f2eb;--panel:#fffdf8;--ink:#2d2925;--muted:#716b63;--line:#d9d2c7;--accent:#e65a2f;--accent2:#f4b23a;--blue:#2e79c7;--green:#459b62;--shadow:0 10px 30px #382d2117}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;overflow:hidden}
-button,input,select{font:inherit} button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;color:var(--ink)} button:hover{border-color:#aaa} button.primary{background:var(--accent);color:white;border-color:var(--accent)} button.good{background:var(--green);color:white;border-color:var(--green)} button.warn{background:var(--accent2);border-color:var(--accent2)} button.small{padding:5px 8px;font-size:12px;border-radius:8px}.danger{color:#b92929}
-.app{height:100vh;display:grid;grid-template-rows:58px 1fr}.topbar{display:flex;align-items:center;gap:12px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px #0000000a;z-index:3}.brand{font-weight:900;white-space:nowrap}.tabs{display:flex;gap:6px}.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}.spacer{flex:1}.status{font-size:12px;color:var(--muted)}
-.main{min-height:0;display:grid;grid-template-columns:300px minmax(430px,1fr) 330px;gap:10px;padding:10px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);min-height:0;overflow:hidden}.panel h3{margin:0;font-size:14px}.panelhead{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--line);background:#fff}.scroll{height:calc(100% - 44px);overflow:auto;padding:10px}.section{padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:10px}.section h4{font-size:12px;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.row{display:flex;gap:7px;align-items:center;margin:7px 0}.row>label{font-size:12px;color:var(--muted);min-width:68px}.row input[type="range"]{flex:1}.row input[type="number"],.row input[type="text"],.row select{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px;background:#fff}.value{font-variant-numeric:tabular-nums;font-size:11px;color:var(--muted);min-width:42px;text-align:right}.btns{display:flex;flex-wrap:wrap;gap:6px}.src-item,.asset-item,.layer-item{display:flex;align-items:center;gap:8px;padding:7px;border-radius:9px;border:1px solid transparent;margin-bottom:5px}.src-item:hover,.asset-item:hover,.layer-item:hover{background:#f7f3eb}.src-item.active,.asset-item.active,.layer-item.active{background:#fff1e9;border-color:#f0b39c}.thumb{width:46px;height:46px;border-radius:8px;background:linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;object-fit:contain;border:1px solid #ddd}.meta{min-width:0;flex:1}.meta b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta span{font-size:10px;color:var(--muted)}
-.center{display:grid;grid-template-rows:44px 1fr;min-height:0}.canvaswrap{position:relative;min-height:0;background:#d9d5cd;overflow:hidden}.canvaswrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.hint{position:absolute;left:12px;bottom:12px;padding:7px 10px;background:#25221fcc;color:white;border-radius:9px;font-size:11px;pointer-events:none}.floating{position:absolute;top:12px;right:12px;display:flex;gap:6px}
-.mode-crop .composer-only,.mode-compose .crop-only{display:none!important}.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.asset-card{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px;min-width:0}.asset-card img{width:100%;height:78px;object-fit:contain;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 50%/12px 12px;border-radius:7px}.asset-card b{display:block;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}.layer-handle{font-size:16px;color:#aaa}.layer-actions{display:flex;gap:3px}.badge{display:inline-block;font-size:10px;padding:2px 5px;border-radius:5px;background:#eee;color:#555;margin-left:5px}.drop{border:2px dashed #bbb;border-radius:10px;padding:12px;text-align:center;color:var(--muted);font-size:12px}.drop.drag{border-color:var(--accent);background:#fff3ec}.two{display:grid;grid-template-columns:1fr 1fr;gap:6px}.hidden{display:none!important}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#24211e;color:white;padding:9px 13px;border-radius:10px;font-size:12px;z-index:20;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;bottom:26px}
-@media(max-width:950px){body{overflow:auto}.app{height:auto;min-height:100vh}.main{grid-template-columns:1fr;grid-template-rows:auto 70vh auto}.panel{min-height:380px}.topbar{position:sticky;top:0;flex-wrap:wrap;height:auto}.status{display:none}}
-</style>
-</head>
-<body class="mode-compose">
-<div class="app">
-  <header class="topbar">
-    <div class="brand">🦀 アセット調整ツール</div>
-    <div class="tabs"><button class="tab active" id="tabCompose">① 料理プレビュー</button><button class="tab" id="tabCrop">② 切り抜き補助</button></div>
-    <div class="spacer"></div>
-    <button id="saveProject">プロジェクト保存</button><button id="loadProjectBtn">読込</button><input id="loadProject" type="file" accept="application/json" hidden>
-    <button class="primary" id="exportGame">ゲーム用ZIP</button>
-    <div class="status" id="status">準備完了</div>
-  </header>
-  <main class="main">
-    <aside class="panel">
-      <div class="panelhead"><h3 class="crop-only">素材元</h3><h3 class="composer-only">切り抜き済み素材</h3><button class="small crop-only" id="uploadBtn">画像追加</button><input id="uploadInput" type="file" accept="image/*" multiple hidden></div>
-      <div class="scroll crop-only">
-        <div id="sourceList"></div>
-        <div class="section">
-          <h4>切り抜き方式</h4>
-          <div class="btns"><button class="small tool active" data-tool="rect">矩形</button><button class="small tool" data-tool="polygon">多角形</button><button class="small tool" data-tool="free">フリーハンド</button><button class="small tool" data-tool="pan">移動</button></div>
-          <div class="row"><label>余白</label><input id="cropPadding" type="range" min="0" max="80" value="8"><span class="value" id="padVal">8px</span></div>
-          <div class="row"><label>透過閾値</label><input id="alphaThreshold" type="range" min="1" max="200" value="18"><span class="value" id="alphaVal">18</span></div>
-          <div class="btns"><button id="autoDetect" class="warn">透過から自動分割</button><button id="clearSelection">選択解除</button></div>
-        </div>
-        <div class="section">
-          <h4>現在の切り抜き</h4>
-          <div class="row"><label>素材名</label><input id="assetName" type="text" placeholder="例: fill_crab"></div>
-          <div class="btns"><button class="good" id="registerCrop">素材として登録</button><button id="downloadCrop">PNG保存</button></div>
-          <div style="font-size:11px;color:var(--muted);margin-top:8px">多角形: クリックで点追加 → ダブルクリック/Enterで確定。フリーハンド: ドラッグで囲む。</div>
-        </div>
-        <div class="section"><h4>自動検出候補</h4><div id="detectedList" class="asset-grid"></div></div>
-      </div>
-      <div class="scroll composer-only">
-        <div class="section"><div class="drop" id="assetDrop">ここへ画像をドロップして素材追加<br><span style="font-size:10px">PNG / WebP 推奨</span></div><input id="assetUpload" type="file" accept="image/*" multiple hidden><button id="assetUploadBtn" style="width:100%;margin-top:6px">素材画像を追加</button></div>
-        <div id="assetLibrary" class="asset-grid"></div>
-      </div>
-    </aside>
 
-    <section class="panel center">
-      <div class="panelhead"><h3 id="canvasTitle">切り抜きプレビュー</h3><div class="btns"><button class="small" id="fitView">全体表示</button><button class="small composer-only" id="resetDish">配置リセット</button></div></div>
-      <div class="canvaswrap" id="canvasWrap"><canvas id="mainCanvas"></canvas><div class="floating crop-only"><button class="small" id="zoomOut">−</button><button class="small" id="zoomIn">＋</button></div><div class="hint" id="hint">ドラッグして矩形を作成</div></div>
-    </section>
-
-    <aside class="panel">
-      <div class="panelhead"><h3 class="crop-only">切り抜き情報</h3><h3 class="composer-only">レイヤー調整</h3></div>
-      <div class="scroll crop-only">
-        <div class="section"><h4>操作</h4><div class="row"><label>ズーム</label><input id="zoomRange" type="range" min="10" max="500" value="100"><span class="value" id="zoomVal">100%</span></div><div class="row"><label>X</label><span id="selX">-</span></div><div class="row"><label>Y</label><span id="selY">-</span></div><div class="row"><label>幅</label><span id="selW">-</span></div><div class="row"><label>高さ</label><span id="selH">-</span></div></div>
-        <div class="section"><h4>便利機能</h4><div class="btns"><button id="trimAlpha">透明余白を詰める</button><button id="invertMask">選択反転</button></div></div>
-      </div>
-      <div class="scroll composer-only">
-        <div class="section">
-          <h4>料理キャンバス</h4>
-          <div class="row"><label>幅</label><input id="dishW" type="number" min="128" max="2048" value="768"></div><div class="row"><label>高さ</label><input id="dishH" type="number" min="128" max="2048" value="768"></div>
-          <div class="row"><label>背景</label><select id="bgMode"><option value="checker">透過</option><option value="white">白</option><option value="dark">濃色</option></select></div>
-        </div>
-        <div class="section"><h4>レイヤー一覧 <span class="badge" id="layerCount">0</span></h4><div id="layerList"></div></div>
-        <div class="section" id="layerEditor">
-          <h4>選択レイヤー</h4>
-          <div class="row"><label>名前</label><input id="layerName" type="text"></div>
-          <div class="row"><label>X</label><input id="layerX" type="range" min="-600" max="1400" value="0"><span class="value" id="layerXVal">0</span></div>
-          <div class="row"><label>Y</label><input id="layerY" type="range" min="-600" max="1400" value="0"><span class="value" id="layerYVal">0</span></div>
-          <div class="row"><label>拡大率</label><input id="layerScale" type="range" min="5" max="400" value="100"><span class="value" id="layerScaleVal">100%</span></div>
-          <div class="row"><label>回転</label><input id="layerRot" type="range" min="-180" max="180" value="0"><span class="value" id="layerRotVal">0°</span></div>
-          <div class="row"><label>透明度</label><input id="layerOpacity" type="range" min="0" max="100" value="100"><span class="value" id="layerOpacityVal">100%</span></div>
-          <div class="row"><label>左右反転</label><input id="layerFlip" type="checkbox"></div>
-          <div class="btns"><button id="layerUp">前へ</button><button id="layerDown">後ろへ</button><button id="dupLayer">複製</button><button id="delLayer" class="danger">削除</button></div>
-        </div>
-        <div class="section">
-          <h4>パターン保存</h4>
-          <div class="row"><label>パターン名</label><input id="recipeName" type="text" placeholder="crab_cream_normal"></div>
-          <div class="btns"><button id="saveRecipe" class="good">現在配置を保存</button><button id="exportPng">完成PNG</button></div>
-          <select id="recipeList" style="width:100%;margin-top:7px;padding:7px;border:1px solid var(--line);border-radius:8px"><option value="">保存済みパターン...</option></select>
-        </div>
-      </div>
-    </aside>
-  </main>
-</div>
-<div class="toast" id="toast"></div>
-<script>
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -103,7 +10,48 @@ function status(t){$('#status').textContent=t}
 function resize(){const r=wrap.getBoundingClientRect();canvas.width=Math.max(1,Math.floor(r.width*devicePixelRatio));canvas.height=Math.max(1,Math.floor(r.height*devicePixelRatio));draw()}
 addEventListener('resize',resize);
 function imgFrom(url){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url})}
-async function init(){for(const [f,name] of builtins){const img=await imgFrom('assets/'+f);state.sources.push({id:'src_'+crypto.randomUUID(),name,file:f,img,url:'assets/'+f});} state.source=state.sources[0];renderSources();fitSource();resize();status('内蔵素材を読み込みました')}
+async function init(){
+  for(const [f,name] of builtins){
+    const img=await imgFrom('assets/'+f);
+    const src={id:'src_'+crypto.randomUUID(),name,file:f,img,url:'assets/'+f};
+    state.sources.push(src);
+    await autoExtractBuiltinAssets(src, f.replace(/\.png$/,''));
+  }
+  state.source=state.sources[0];
+  renderSources(); renderAssets(); renderLayers(); renderRecipes();
+  resize(); setMode('compose');
+  status('内蔵素材を自動分割しました。必要な素材をクリックして合成できます');
+}
+async function autoExtractBuiltinAssets(src,prefix){
+  const im=src.img, c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
+  const g=c.getContext('2d',{willReadFrequently:true}); g.drawImage(im,0,0);
+  const dat=g.getImageData(0,0,c.width,c.height).data, W=c.width,H=c.height, ds=3, w=Math.ceil(W/ds), h=Math.ceil(H/ds), thr=18;
+  const mask=new Uint8Array(w*h);
+  for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
+    let a=0; for(let sy=0;sy<ds;sy++)for(let sx=0;sx<ds;sx++){
+      const x=Math.min(W-1,xx*ds+sx),y=Math.min(H-1,yy*ds+sy); a=Math.max(a,dat[(y*W+x)*4+3]);
+    }
+    if(a>thr) mask[yy*w+xx]=1;
+  }
+  const seen=new Uint8Array(w*h), comps=[], qx=new Int32Array(w*h), qy=new Int32Array(w*h);
+  for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
+    let idx=yy*w+xx; if(!mask[idx]||seen[idx]) continue;
+    let qs=0,qe=0; qx[qe]=xx; qy[qe++]=yy; seen[idx]=1;
+    let minx=xx,maxx=xx,miny=yy,maxy=yy,count=0;
+    while(qs<qe){const x=qx[qs],y=qy[qs++]; count++; minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,y);maxy=Math.max(maxy,y);
+      for(const [nx,ny] of [[x+1,y],[x-1,y],[x,y+1],[x,y-1]]){if(nx<0||ny<0||nx>=w||ny>=h)continue;const ni=ny*w+nx;if(mask[ni]&&!seen[ni]){seen[ni]=1;qx[qe]=nx;qy[qe++]=ny}}
+    }
+    if(count>55) comps.push({x:minx*ds,y:miny*ds,w:(maxx-minx+1)*ds,h:(maxy-miny+1)*ds,count});
+  }
+  comps.sort((a,b)=>a.y-b.y || a.x-b.x);
+  let n=1;
+  for(const b of comps){
+    const pad=8, x=Math.max(0,b.x-pad), y=Math.max(0,b.y-pad), rw=Math.min(W-x,b.w+pad*2), rh=Math.min(H-y,b.h+pad*2);
+    const out=document.createElement('canvas'); out.width=rw; out.height=rh; out.getContext('2d').drawImage(im,x,y,rw,rh,0,0,rw,rh);
+    const url=out.toDataURL('image/png'), img=new Image(); img.src=url;
+    state.assets.push({id:'asset_'+crypto.randomUUID(),name:`${prefix}_${String(n).padStart(2,'0')}`,url,img,w:rw,h:rh,pngDataUrl:url,sourceId:src.id,auto:true}); n++;
+  }
+}
 function setMode(m){state.mode=m;document.body.className='mode-'+m;$('#tabCrop').classList.toggle('active',m==='crop');$('#tabCompose').classList.toggle('active',m==='compose');$('#canvasTitle').textContent=m==='crop'?'切り抜きプレビュー':'料理プレビュー';$('#hint').textContent=m==='crop'?toolHint():'素材をクリックして追加 / レイヤーをドラッグして移動';if(m==='compose') fitDish(); else fitSource();draw()}
 $('#tabCrop').onclick=()=>setMode('crop');$('#tabCompose').onclick=()=>setMode('compose');
 function renderSources(){const box=$('#sourceList');box.innerHTML='';state.sources.forEach(s=>{const d=document.createElement('div');d.className='src-item'+(s===state.source?' active':'');d.innerHTML=`<img class="thumb" src="${s.img.src}"><div class="meta"><b>${esc(s.name)}</b><span>${s.img.naturalWidth}×${s.img.naturalHeight}</span></div>`;d.onclick=()=>{state.source=s;state.selection=null;state.poly=[];state.free=[];renderSources();fitSource();draw()};box.appendChild(d)})}
@@ -171,6 +119,3 @@ const crcTable=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n
 function downloadCanvas(c,name){c.toBlob(b=>downloadBlob(b,name),'image/png')}function downloadBlob(b,name){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}function dataUrlToBlob(u){const [h,d]=u.split(','),m=h.match(/:(.*?);/)[1],bin=atob(d),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:m})}function safe(s){return s.replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'')||'asset'}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 resize();init();
 })();
-</script>
-</body>
-</html>
