@@ -1,190 +1,269 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>カニ・クリーム・コロッケ 料理アセット調整ツール</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>カニ・クリーム・コロッケ 組み合わせプレビュー＆調整ツール v2</title>
 <style>
-:root{--bg:#f5f1e8;--panel:#fffdf8;--ink:#27241f;--sub:#746d62;--line:#d9d0c1;--accent:#e85d2a;--accent2:#1568b5;--shadow:0 10px 28px #4b3a2418}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Yu Gothic UI","Hiragino Sans",sans-serif;height:100vh;overflow:hidden}
-button,input,select{font:inherit} button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 11px;cursor:pointer;color:var(--ink)} button:hover{background:#faf5eb}.primary{background:var(--accent);border-color:var(--accent);color:white}.primary:hover{background:#d94f20}.blue{background:var(--accent2);border-color:var(--accent2);color:white}.danger{color:#a32323}.mini{padding:4px 7px;border-radius:7px;font-size:12px}
-header{height:58px;background:#2e2a25;color:white;display:flex;align-items:center;padding:0 16px;gap:12px;box-shadow:0 2px 12px #0003;position:relative;z-index:5} header h1{font-size:16px;margin:0;font-weight:800;letter-spacing:.02em} header .spacer{flex:1} header button{background:#403a33;color:white;border-color:#5a5147}
-.tabs{display:flex;gap:6px}.tabBtn.active{background:#fff;color:#222}
-main{height:calc(100vh - 58px)} .view{height:100%;display:none}.view.active{display:grid}
-#composeView{grid-template-columns:250px minmax(390px,1fr) 300px;gap:10px;padding:10px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-height:0;overflow:hidden}.panelTitle{font-weight:800;font-size:13px;padding:11px 12px;border-bottom:1px solid var(--line);background:#fbf6ec;display:flex;align-items:center;gap:8px}.panelBody{padding:10px;height:calc(100% - 43px);overflow:auto}
-.libraryTabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}.libraryTabs button.active{background:#27241f;color:#fff}.assetGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.assetCard{border:1px solid var(--line);border-radius:10px;background:white;padding:6px;text-align:center;cursor:pointer;min-height:94px;display:flex;flex-direction:column;justify-content:space-between}.assetCard:hover{outline:2px solid #e85d2a55}.assetCard img{width:100%;height:65px;object-fit:contain}.assetCard span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stagePanel{display:flex;flex-direction:column}.stageTop{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;gap:8px;flex-wrap:wrap}.stageWrap{flex:1;min-height:0;display:flex;justify-content:center;align-items:center;padding:10px;background:linear-gradient(45deg,#eee8dc 25%,transparent 25%) 0 0/20px 20px,linear-gradient(45deg,transparent 75%,#eee8dc 75%) 0 0/20px 20px,linear-gradient(45deg,transparent 75%,#eee8dc 75%) 10px -10px/20px 20px,linear-gradient(45deg,#eee8dc 25%,#f9f6f0 25%) 10px -10px/20px 20px;overflow:auto}
-#previewCanvas{background:transparent;box-shadow:0 8px 30px #0002;max-width:100%;max-height:100%;touch-action:none}.hint{font-size:11px;color:var(--sub)}
-.presetRow{display:flex;gap:6px;overflow:auto;padding-bottom:3px}.presetRow button{white-space:nowrap}
-.layerItem{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:6px;padding:7px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:white;cursor:pointer}.layerItem.sel{outline:2px solid #e85d2a88;background:#fff7f1}.eye{width:22px;height:22px;padding:0}.layerName{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.layerBtns{display:flex;gap:3px}.props{display:grid;grid-template-columns:78px 1fr 54px;gap:7px;align-items:center;font-size:12px;margin-bottom:7px}.props input[type=range]{width:100%}.props input[type=number]{width:54px;padding:5px;border:1px solid var(--line);border-radius:6px}.section{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}.section:first-child{border:0;margin-top:0;padding-top:0}.sectionTitle{font-size:12px;font-weight:800;margin-bottom:7px}.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.check{font-size:12px;display:flex;gap:5px;align-items:center}.status{font-size:11px;color:var(--sub);margin-top:6px}
-#cropView{grid-template-columns:280px 1fr;gap:10px;padding:10px}.cropTools .section{margin-top:10px}.cropStage{display:flex;flex-direction:column}.cropTop{height:48px;border-bottom:1px solid var(--line);display:flex;gap:7px;align-items:center;padding:0 10px}.cropCanvasWrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:auto;background:#e8e3da;padding:10px}.cropCanvasWrap canvas{box-shadow:0 5px 24px #0003;max-width:100%;max-height:100%;touch-action:none}.modeGroup{display:grid;grid-template-columns:1fr 1fr;gap:6px}.modeGroup button.active{background:#27241f;color:#fff}.sourceThumbs{display:grid;grid-template-columns:1fr;gap:6px}.sourceThumb{display:flex;align-items:center;gap:7px;text-align:left}.sourceThumb img{width:64px;height:48px;object-fit:contain;background:#ddd}.smallNote{font-size:11px;color:var(--sub);line-height:1.5}.cropResult{width:100%;height:130px;object-fit:contain;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 50%/16px 16px;border:1px solid var(--line);border-radius:9px}
-@media(max-width:980px){body{overflow:auto}header{position:sticky;top:0}.view{height:auto!important;min-height:calc(100vh - 58px)}#composeView{grid-template-columns:1fr;padding:8px}.stagePanel{order:-1;height:68vh}.panel{min-height:320px}#cropView{grid-template-columns:1fr}.cropStage{height:65vh}}
+:root{--bg:#f5f1e8;--panel:#fffdf8;--ink:#25221c;--sub:#6f685d;--line:#ddd3c2;--accent:#e85d2a;--accent2:#2563eb;--shadow:0 8px 24px rgba(87,60,23,.12)}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Yu Gothic UI","Hiragino Sans",sans-serif}
+button,input,select{font:inherit} button{border:1px solid var(--line);background:white;border-radius:10px;padding:8px 10px;cursor:pointer;color:var(--ink)} button:hover{background:#fff7f0}
+.primary{background:var(--accent);color:#fff;border-color:var(--accent)} .blue{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+header{height:60px;background:#2f2a25;color:#fff;display:flex;align-items:center;gap:10px;padding:0 14px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header h1{margin:0;font-size:16px;font-weight:800} .spacer{flex:1} .tabs{display:flex;gap:6px} .tabBtn{background:#494238;color:#fff;border-color:#665e54} .tabBtn.active{background:#fff;color:#1f1d1a}
+main{padding:10px} .view{display:none} .view.active{display:grid}
+#composeView{grid-template-columns:320px minmax(460px,1fr) 320px;gap:10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;min-height:0}
+.panelTitle{padding:12px 14px;border-bottom:1px solid var(--line);background:#fcf7ef;font-size:13px;font-weight:800}
+.panelBody{padding:10px;overflow:auto;max-height:calc(100vh - 100px)}
+.section{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}.section:first-child{border-top:0;margin-top:0;padding-top:0}.sectionTitle{font-size:12px;font-weight:800;margin-bottom:8px}
+.small{font-size:11px;color:var(--sub);line-height:1.45}.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+label{font-size:12px;font-weight:700;display:block;margin-bottom:4px} select,input[type=number]{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.check{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.stagePanel{display:flex;flex-direction:column}.stageTop{padding:10px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stageWrap{display:flex;align-items:center;justify-content:center;padding:10px;background:linear-gradient(45deg,#ece6da 25%,transparent 25%) 0 0/20px 20px,linear-gradient(45deg,transparent 75%,#ece6da 75%) 0 0/20px 20px,linear-gradient(45deg,transparent 75%,#ece6da 75%) 10px -10px/20px 20px,linear-gradient(45deg,#ece6da 25%,#f9f6f0 25%) 10px -10px/20px 20px;min-height:760px;overflow:auto}
+#previewCanvas{background:transparent;max-width:100%;height:auto;touch-action:none;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.assetGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.assetCard{border:1px solid var(--line);border-radius:12px;background:#fff;padding:6px;cursor:pointer}.assetCard.active{outline:2px solid var(--accent)} .assetCard canvas{width:100%;height:68px;display:block}.assetCard span{display:block;font-size:11px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.layerList{display:flex;flex-direction:column;gap:6px}.layerItem{display:grid;grid-template-columns:24px 1fr auto;gap:6px;align-items:center;padding:7px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}.layerItem.sel{outline:2px solid rgba(232,93,42,.5);background:#fff7f3}
+.layerName{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mini{padding:4px 7px;font-size:11px;border-radius:7px} .eye{padding:0;width:22px;height:22px}.props{display:grid;grid-template-columns:72px 1fr 56px;gap:6px;align-items:center;font-size:12px;margin-bottom:6px}.props input[type=range]{width:100%}
+.comboGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.comboCard{border:1px solid var(--line);border-radius:12px;padding:6px;background:white;cursor:pointer}.comboCard:hover{outline:2px solid rgba(37,99,235,.28)} .comboCard canvas{width:100%;height:auto;background:#fbf7ef;border-radius:8px}.comboCard .cap{font-size:11px;line-height:1.3;margin-top:5px;text-align:center}
+#cropView{grid-template-columns:300px 1fr;gap:10px}.cropWrap{display:flex;align-items:center;justify-content:center;background:#e9e2d5;min-height:720px;padding:10px}.cropWrap canvas{max-width:100%;height:auto;box-shadow:0 10px 30px rgba(0,0,0,.18)} .sourceThumbs{display:grid;gap:8px}.sourceThumb{display:flex;align-items:center;gap:8px;text-align:left}.sourceThumb canvas{width:72px;height:52px;background:#f5f1e8;border-radius:8px;border:1px solid var(--line)} .modeGroup{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.modeGroup button.active{background:#2f2a25;color:#fff}
+.cropResult{width:100%;height:132px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 50%/16px 16px}
+.footerBtns{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:1100px){#composeView{grid-template-columns:1fr}#cropView{grid-template-columns:1fr}.panelBody{max-height:none}.stageWrap{min-height:60vh}}
 </style>
 </head>
 <body>
 <header>
-  <h1>🍽 料理アセット調整ツール</h1>
-  <div class="tabs"><button class="tabBtn active" data-view="composeView">料理プレビュー</button><button class="tabBtn" data-view="cropView">切り抜き（補助）</button></div>
+  <h1>🍽 カニ・クリーム・コロッケ 組み合わせプレビュー＆調整ツール v2</h1>
+  <div class="tabs">
+    <button class="tabBtn active" data-view="composeView">料理プレビュー</button>
+    <button class="tabBtn" data-view="cropView">切り抜き（補助）</button>
+  </div>
   <div class="spacer"></div>
-  <button id="importJsonBtn">JSON読込</button><button id="exportJsonBtn">JSON保存</button><button id="exportPngBtn" class="primary">PNG保存</button>
+  <button id="exportJsonBtn">JSON保存</button>
+  <button id="importJsonBtn">JSON読込</button>
+  <button id="exportPngBtn" class="primary">PNG保存</button>
   <input id="jsonFile" type="file" accept="application/json" hidden>
 </header>
 <main>
 <section id="composeView" class="view active">
   <aside class="panel">
-    <div class="panelTitle">素材ライブラリ</div>
+    <div class="panelTitle">組み合わせ・原案</div>
     <div class="panelBody">
-      <div class="libraryTabs" id="libraryTabs"></div>
-      <div class="assetGrid" id="assetGrid"></div>
-      <div class="section"><div class="sectionTitle">手元のPNGを追加</div><div class="row"><button id="addLocalAsset">画像を選択</button><input id="localAssetFile" type="file" accept="image/*" hidden></div><div class="smallNote">切り抜き画面から作った素材も、このセッション中はここへ追加できます。</div></div>
+      <div class="section">
+        <div class="sectionTitle">基本パターン</div>
+        <div class="grid2">
+          <div><label>液体</label><select id="sauceSelect"></select></div>
+          <div><label>具材</label><select id="mainSelect"></select></div>
+          <div><label>焼き具合</label><select id="finishSelect"></select></div>
+          <div><label>並び</label><select id="layoutSelect"><option value="standard">標準</option><option value="ingredientFocus">具材を強調</option><option value="sauceFocus">液体を強調</option></select></div>
+        </div>
+        <div class="grid3" style="margin-top:8px">
+          <label class="check"><input type="checkbox" id="legsCheck">足をつける</label>
+          <label class="check"><input type="checkbox" id="glassCheck">グラサン</label>
+          <label class="check"><input type="checkbox" id="headphoneCheck">ヘッドホン</label>
+          <label class="check"><input type="checkbox" id="steamCheck">湯気</label>
+          <label class="check"><input type="checkbox" id="sparkleCheck">キラキラ</label>
+        </div>
+        <div class="footerBtns" style="margin-top:8px"><button id="applyBasePreset" class="blue">原案を反映</button><button id="resetLayoutBtn">位置を初期化</button></div>
+        <div class="small" style="margin-top:7px">まずこちらでこちら側の原案配置を自動生成します。そのあと右側で個別レイヤーを動かして微調整できます。</div>
+      </div>
+
+      <div class="section">
+        <div class="sectionTitle">全パターン一覧</div>
+        <div class="row"><button id="buildComboGrid" class="blue">一覧を生成 / 更新</button><span class="small">現在の焼き具合・装飾条件で、全具材×全液体を表示します。</span></div>
+        <div id="comboGrid" class="comboGrid" style="margin-top:8px"></div>
+      </div>
+
+      <div class="section">
+        <div class="sectionTitle">素材ライブラリ</div>
+        <div class="small">クリックすると現在の選択レイヤーの見た目を差し替えます。</div>
+        <div class="row" style="margin:8px 0"><button class="mini libTab blue" data-cat="base">土台</button><button class="mini libTab" data-cat="sauce">液体</button><button class="mini libTab" data-cat="main">具材</button><button class="mini libTab" data-cat="extra">装飾</button></div>
+        <div id="assetGrid" class="assetGrid"></div>
+      </div>
     </div>
   </aside>
 
   <section class="panel stagePanel">
-    <div class="stageTop">
-      <strong>原案プレビュー</strong>
-      <div class="presetRow" id="presetRow"></div>
-      <span class="hint">画像をドラッグして位置調整</span>
-    </div>
-    <div class="stageWrap"><canvas id="previewCanvas" width="720" height="720"></canvas></div>
+    <div class="stageTop"><strong>料理プレビュー</strong><span class="small">キャンバス上の素材をドラッグして位置調整できます。PNG保存とJSON保存に対応。</span></div>
+    <div class="stageWrap"><canvas id="previewCanvas" width="760" height="760"></canvas></div>
   </section>
 
   <aside class="panel">
-    <div class="panelTitle">レイヤー・調整</div>
+    <div class="panelTitle">レイヤー調整</div>
     <div class="panelBody">
-      <div id="layerList"></div>
-      <div class="section" id="layerProps">
+      <div id="layerList" class="layerList"></div>
+      <div class="section">
         <div class="sectionTitle">選択レイヤー</div>
-        <div id="noLayer" class="smallNote">レイヤーを選択してください。</div>
-        <div id="propControls" hidden>
-          <div class="props"><label>X</label><input id="xRange" type="range" min="-200" max="920"><input id="xNum" type="number"></div>
-          <div class="props"><label>Y</label><input id="yRange" type="range" min="-200" max="920"><input id="yNum" type="number"></div>
-          <div class="props"><label>拡大率</label><input id="scaleRange" type="range" min="0.05" max="2.5" step="0.01"><input id="scaleNum" type="number" min="0.05" max="4" step="0.01"></div>
-          <div class="props"><label>回転</label><input id="rotRange" type="range" min="-180" max="180" step="1"><input id="rotNum" type="number" min="-360" max="360"></div>
-          <div class="props"><label>透明度</label><input id="alphaRange" type="range" min="0" max="1" step="0.01"><input id="alphaNum" type="number" min="0" max="1" step="0.01"></div>
-          <div class="row"><label class="check"><input id="flipX" type="checkbox">左右反転</label><label class="check"><input id="clipInside" type="checkbox">断面内にクリップ</label><button id="duplicateLayer" class="mini">複製</button><button id="deleteLayer" class="mini danger">削除</button></div>
+        <div id="layerNone" class="small">レイヤーを選択してください。</div>
+        <div id="layerProps" hidden>
+          <div class="props"><label>X</label><input id="xRange" type="range" min="-200" max="960"><input id="xNum" type="number"></div>
+          <div class="props"><label>Y</label><input id="yRange" type="range" min="-200" max="960"><input id="yNum" type="number"></div>
+          <div class="props"><label>拡大率</label><input id="scaleRange" type="range" min="0.05" max="2.8" step="0.01"><input id="scaleNum" type="number" step="0.01"></div>
+          <div class="props"><label>回転</label><input id="rotRange" type="range" min="-180" max="180" step="1"><input id="rotNum" type="number"></div>
+          <div class="props"><label>透明度</label><input id="alphaRange" type="range" min="0" max="1" step="0.01"><input id="alphaNum" type="number" step="0.01"></div>
+          <div class="row"><label class="check"><input id="flipX" type="checkbox">左右反転</label><label class="check"><input id="clipCheck" type="checkbox">断面内にクリップ</label></div>
+          <div class="footerBtns" style="margin-top:6px"><button id="dupLayerBtn" class="mini">複製</button><button id="delLayerBtn" class="mini">削除</button></div>
         </div>
       </div>
       <div class="section">
         <div class="sectionTitle">断面マスク</div>
-        <div class="props"><label>中心X</label><input id="maskX" type="range" min="0" max="720"><input id="maskXn" type="number"></div>
-        <div class="props"><label>中心Y</label><input id="maskY" type="range" min="0" max="720"><input id="maskYn" type="number"></div>
-        <div class="props"><label>横半径</label><input id="maskRX" type="range" min="20" max="300"><input id="maskRXn" type="number"></div>
-        <div class="props"><label>縦半径</label><input id="maskRY" type="range" min="20" max="220"><input id="maskRYn" type="number"></div>
-        <label class="check"><input id="showMask" type="checkbox">マスク位置を表示</label>
+        <div class="props"><label>中心X</label><input id="maskX" type="range" min="0" max="760"><input id="maskXn" type="number"></div>
+        <div class="props"><label>中心Y</label><input id="maskY" type="range" min="0" max="760"><input id="maskYn" type="number"></div>
+        <div class="props"><label>横半径</label><input id="maskRX" type="range" min="20" max="320"><input id="maskRXn" type="number"></div>
+        <div class="props"><label>縦半径</label><input id="maskRY" type="range" min="20" max="260"><input id="maskRYn" type="number"></div>
+        <label class="check"><input id="showMask" type="checkbox">断面マスクを表示</label>
+        <div class="small" style="margin-top:6px">液体や具材が断面からはみ出す時は、ここでマスク位置を少しだけ直せます。</div>
       </div>
-      <div class="section"><div class="sectionTitle">ゲーム連携</div><div class="smallNote">JSONには素材パス、位置、拡大率、回転、描画順、断面マスクが保存されます。ゲーム側で同じ描画処理を使えば、ここで調整した見た目をそのまま再現できます。</div><div id="saveStatus" class="status"></div></div>
+      <div class="section"><div class="sectionTitle">メモ</div><div class="small" id="statusText">この版は最新の斜め断面アセットを使い、全具材×全液体系のパターン確認をしやすくしています。特殊料理判定はまだ入れていません。</div></div>
     </div>
   </aside>
 </section>
 
 <section id="cropView" class="view">
-  <aside class="panel cropTools">
-    <div class="panelTitle">切り抜き（補助機能）</div>
+  <aside class="panel">
+    <div class="panelTitle">切り抜き（補助）</div>
     <div class="panelBody">
-      <div class="smallNote">素材シートからの切り抜きがおかしい時だけ使う想定です。矩形・多角形・自由なぞりに対応しています。</div>
-      <div class="section"><div class="sectionTitle">元画像</div><div class="sourceThumbs" id="sourceThumbs"></div><div class="row" style="margin-top:7px"><button id="openCropFile">別画像を開く</button><input id="cropFile" type="file" accept="image/*" hidden></div></div>
-      <div class="section"><div class="sectionTitle">切り抜き方法</div><div class="modeGroup"><button data-cropmode="rect" class="active">矩形</button><button data-cropmode="polygon">多角形</button><button data-cropmode="free">自由なぞり</button><button id="clearSelection">選択解除</button></div><div class="smallNote">多角形：クリックで点を追加、ダブルクリックで確定。自由なぞり：押したまま輪郭をなぞります。</div></div>
-      <div class="section"><div class="sectionTitle">余白</div><input id="cropPadding" type="range" min="0" max="80" value="12"><span id="padLabel">12 px</span></div>
-      <div class="section"><div class="row"><button id="makeCrop" class="primary">切り抜きを作成</button><button id="downloadCrop">PNG保存</button></div><img id="cropResult" class="cropResult" alt="切り抜き結果"><div class="row" style="margin-top:7px"><input id="cropAssetName" placeholder="素材名" style="flex:1;min-width:120px;padding:7px;border:1px solid var(--line);border-radius:8px"><button id="addCropToLibrary" class="blue">素材一覧へ追加</button></div></div>
+      <div class="small">あなた側で「この切り抜き変だな」と感じた時のための補助機能です。矩形・多角形・自由なぞりで切り抜けます。切り抜いた画像はPNG保存できます。</div>
+      <div class="section"><div class="sectionTitle">元画像</div><div id="sourceThumbs" class="sourceThumbs"></div></div>
+      <div class="section"><div class="sectionTitle">切り抜き方法</div><div class="modeGroup"><button data-mode="rect" class="active">矩形</button><button data-mode="polygon">多角形</button><button data-mode="free">自由</button></div></div>
+      <div class="section"><div class="sectionTitle">設定</div><div class="props"><label>余白</label><input id="cropPad" type="range" min="0" max="80" value="10"><input id="cropPadNum" type="number" value="10"></div><div class="footerBtns"><button id="clearCropSel">範囲クリア</button><button id="makeCropBtn" class="blue">切り抜き作成</button><button id="saveCropBtn">PNG保存</button></div></div>
+      <div class="section"><div class="sectionTitle">結果</div><img id="cropResult" class="cropResult" alt="crop result"></div>
     </div>
   </aside>
-  <section class="panel cropStage"><div class="cropTop"><strong id="cropSourceName">素材シート</strong><span class="hint">ホイールで拡大縮小・中ボタン/Space+ドラッグで移動</span></div><div class="cropCanvasWrap"><canvas id="cropCanvas" width="900" height="650"></canvas></div></section>
+  <section class="panel">
+    <div class="panelTitle">切り抜きキャンバス</div>
+    <div class="cropWrap"><canvas id="cropCanvas" width="960" height="760"></canvas></div>
+  </section>
 </section>
 </main>
+
 <script>
-'use strict';
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const canvas=$('#previewCanvas'), ctx=canvas.getContext('2d');
-const assetDefs=[
- {id:'plate',name:'皿',cat:'土台',src:'assets/base/plate.png'},
- {id:'whole',name:'丸ごとコロッケ',cat:'土台',src:'assets/base/whole.png'},
- {id:'frame',name:'断面枠',cat:'土台',src:'assets/base/cut_frame.png'},
- {id:'frameCrisp',name:'サクサク断面枠',cat:'土台',src:'assets/base/cut_frame_crisp.png'},
- {id:'cream',name:'クリーム',cat:'液体',src:'assets/fill/cream.png',clip:true},
- {id:'pink',name:'ピンク液体',cat:'液体',src:'assets/fill/pink.png',clip:true},
- {id:'mayo',name:'マヨ系',cat:'液体',src:'assets/fill/mayo.png',clip:true},
- {id:'yogurt',name:'ヨーグルト系',cat:'液体',src:'assets/fill/yogurt.png',clip:true},
- {id:'mystery',name:'謎の液体',cat:'液体',src:'assets/fill/mystery.png',clip:true},
- {id:'crab',name:'カニ身',cat:'具',src:'assets/fill/crab.png',clip:true},
- {id:'kanikama',name:'カニカマ',cat:'具',src:'assets/fill/kanikama.png',clip:true},
- {id:'kombu',name:'昆布',cat:'具',src:'assets/fill/kombu.png',clip:true},
- {id:'burn',name:'焦げ目',cat:'仕上げ',src:'assets/decor/burn.png'},
- {id:'steam',name:'湯気',cat:'仕上げ',src:'assets/decor/steam.png'},
- {id:'sparkle',name:'キラキラ',cat:'仕上げ',src:'assets/decor/sparkle.png'},
- {id:'footL',name:'足・左',cat:'特殊',src:'assets/decor/foot_left.png'},
- {id:'footR',name:'足・右',cat:'特殊',src:'assets/decor/foot_right.png'},
- {id:'glasses',name:'黒グラサン',cat:'特殊',src:'assets/decor/sunglasses.png'},
- {id:'djGlasses',name:'DJグラサン',cat:'特殊',src:'assets/decor/dj_glasses.png'},
- {id:'headphones',name:'ヘッドホン',cat:'特殊',src:'assets/decor/headphones.png'},
- {id:'djDeck',name:'DJセット',cat:'特殊',src:'assets/decor/dj_deck.png'},
- {id:'speed',name:'逃走エフェクト',cat:'特殊',src:'assets/decor/speed.png'},
- {id:'impact',name:'衝撃エフェクト',cat:'特殊',src:'assets/decor/impact.png'}
-];
-const assets=new Map(); let extraAssets=[];
-function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src})}
-async function ensureAsset(a){if(!assets.has(a.id)) assets.set(a.id,await loadImage(a.src));return assets.get(a.id)}
-const state={layers:[],selected:null,mask:{x:360,y:350,rx:142,ry:76},showMask:false,preset:'crabCream'};
-let idSeq=1;
-function L(assetId,x,y,scale=1,rotation=0,alpha=1,clip=null){const a=getDef(assetId);return {uid:'l'+idSeq++,assetId,name:a?.name||assetId,x,y,scale,rotation,alpha,flipX:false,visible:true,clipInside:clip??!!a?.clip}}
-const presets={
- crabCream:{label:'カニ＋クリーム',mask:{x:360,y:350,rx:143,ry:76},layers:[()=>L('plate',360,505,.72),()=>L('cream',360,350,.53,0,1,true),()=>L('crab',360,352,.38,0,1,true),()=>L('frame',360,348,.72)]},
- kanikamaMayo:{label:'カニカマ＋マヨ',mask:{x:360,y:350,rx:143,ry:76},layers:[()=>L('plate',360,505,.72),()=>L('mayo',360,350,.48,0,1,true),()=>L('kanikama',360,350,.40,-3,1,true),()=>L('frameCrisp',360,348,.72)]},
- kombuMystery:{label:'昆布＋謎液体',mask:{x:360,y:350,rx:143,ry:76},layers:[()=>L('plate',360,505,.72),()=>L('mystery',360,350,.47,0,1,true),()=>L('kombu',360,350,.36,4,1,true),()=>L('frame',360,348,.72)]},
- burnt:{label:'焦げカニクリーム',mask:{x:360,y:350,rx:143,ry:76},layers:[()=>L('plate',360,505,.72),()=>L('cream',360,350,.53,0,1,true),()=>L('crab',360,352,.38,0,1,true),()=>L('frame',360,348,.72),()=>L('burn',360,340,.88,0,.70)]},
- dj:{label:'DJ原案',mask:{x:360,y:350,rx:143,ry:76},layers:[()=>L('plate',360,520,.72),()=>L('cream',360,365,.53,0,1,true),()=>L('crab',360,366,.38,0,1,true),()=>L('frameCrisp',360,363,.72),()=>L('djGlasses',360,278,.58),()=>L('headphones',360,330,.68),()=>L('djDeck',360,570,.53)]},
- run:{label:'逃げる原案',mask:{x:360,y:330,rx:143,ry:76},layers:[()=>L('cream',360,330,.53,0,1,true),()=>L('kanikama',360,331,.39,0,1,true),()=>L('frame',360,328,.72),()=>L('footL',290,500,.45,-4),()=>L('footR',430,500,.45,4),()=>L('speed',190,355,.55)]}
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const sheetPaths={base:'assets/croquette_sheet.png',fill:'assets/fill_sheet.png'};
+const images={};
+function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+const defs={
+  base:[
+    {id:'plate',name:'皿',sheet:'base',sx:40,sy:40,sw:840,sh:285,cat:'base'},
+    {id:'cutShell',name:'断面ベース',sheet:'base',sx:30,sy:335,sw:470,sh:335,cat:'base'},
+    {id:'cutFrame',name:'断面フレーム',sheet:'base',sx:500,sy:340,sw:458,sh:324,cat:'base'},
+    {id:'whole',name:'丸ごとコロッケ',sheet:'base',sx:900,sy:35,sw:520,sh:300,cat:'base'},
+    {id:'sampleFilled',name:'完成見本',sheet:'base',sx:970,sy:338,sw:460,sh:330,cat:'base'},
+    {id:'shoeL',name:'足L',sheet:'base',sx:32,sy:884,sw:184,sh:145,cat:'extra'},
+    {id:'shoeR',name:'足R',sheet:'base',sx:250,sy:888,sw:144,sh:158,cat:'extra'},
+    {id:'glasses',name:'グラサン',sheet:'base',sx:416,sy:904,sw:314,sh:142,cat:'extra'},
+    {id:'headphones',name:'ヘッドホン',sheet:'base',sx:730,sy:842,sw:305,sh:221,cat:'extra'},
+    {id:'steam',name:'湯気',sheet:'base',sx:1050,sy:870,sw:205,sh:188,cat:'extra'},
+    {id:'sparkle',name:'キラキラ',sheet:'base',sx:1348,sy:950,sw:76,sh:93,cat:'extra'},
+  ],
+  sauces:[
+    {id:'cream',name:'クリーム',sheet:'fill',sx:20,sy:24,sw:340,sh:220,cat:'sauce'},
+    {id:'ice',name:'アイス系',sheet:'fill',sx:362,sy:23,sw:354,sh:220,cat:'sauce'},
+    {id:'mayo',name:'マヨ系',sheet:'fill',sx:720,sy:22,sw:326,sh:224,cat:'sauce'},
+    {id:'yogurt',name:'ヨーグルト系',sheet:'fill',sx:1075,sy:26,sw:345,sh:218,cat:'sauce'},
+    {id:'mysteryPurple',name:'謎の液体A',sheet:'fill',sx:24,sy:279,sw:344,sh:220,cat:'sauce'},
+    {id:'whiteSauce',name:'ホワイトソース',sheet:'fill',sx:371,sy:279,sw:341,sh:219,cat:'sauce'},
+    {id:'milk',name:'ミルク系',sheet:'fill',sx:720,sy:282,sw:320,sh:213,cat:'sauce'},
+    {id:'custard',name:'カスタード系',sheet:'fill',sx:1075,sy:279,sw:345,sh:219,cat:'sauce'},
+  ],
+  mains:[
+    {id:'crabShred',name:'カニほぐし',sheet:'fill',sx:24,sy:533,sw:350,sh:171,cat:'main'},
+    {id:'kanikama',name:'カニカマ',sheet:'fill',sx:396,sy:533,sw:349,sh:173,cat:'main'},
+    {id:'kombu',name:'昆布',sheet:'fill',sx:752,sy:541,sw:344,sh:175,cat:'main'},
+    {id:'starfish',name:'ヒトデ',sheet:'fill',sx:1090,sy:535,sw:333,sh:190,cat:'main'},
+    {id:'boots',name:'長靴',sheet:'fill',sx:86,sy:710,sw:262,sh:142,cat:'main'},
+    {id:'gloves',name:'手袋',sheet:'fill',sx:488,sy:709,sw:290,sh:145,cat:'main'},
+    {id:'crabPieces',name:'カニ身ごろ',sheet:'fill',sx:935,sy:709,sw:425,sh:165,cat:'main'},
+  ]
 };
-function getDef(id){return [...assetDefs,...extraAssets].find(x=>x.id===id)}
-async function applyPreset(k){const p=presets[k]; if(!p)return; state.preset=k;state.mask={...p.mask};state.layers=p.layers.map(f=>f());state.selected=state.layers.at(-1)?.uid||null;await preloadCurrent();syncAll();draw();}
-async function preloadCurrent(){await Promise.all(state.layers.map(l=>ensureAsset(getDef(l.assetId))))}
-function currentLayer(){return state.layers.find(l=>l.uid===state.selected)}
-function screenPoint(ev,c=canvas){const r=c.getBoundingClientRect();return {x:(ev.clientX-r.left)*c.width/r.width,y:(ev.clientY-r.top)*c.height/r.height}}
-async function addAsset(id){const a=getDef(id);await ensureAsset(a);const clip=!!a.clip;const l=L(id,360,clip?350:360,clip?.45:0.6,0,1,clip); if(clip) l.scale=.45; state.layers.push(l);state.selected=l.uid;syncAll();draw()}
-function draw(exportMode=false){ctx.clearRect(0,0,canvas.width,canvas.height); for(const l of state.layers){if(!l.visible)continue;const im=assets.get(l.assetId);if(!im)continue;ctx.save(); if(l.clipInside){ctx.beginPath();ctx.ellipse(state.mask.x,state.mask.y,state.mask.rx,state.mask.ry,0,0,Math.PI*2);ctx.clip()} ctx.globalAlpha=l.alpha;ctx.translate(l.x,l.y);ctx.rotate(l.rotation*Math.PI/180);ctx.scale(l.flipX?-l.scale:l.scale,l.scale);ctx.drawImage(im,-im.width/2,-im.height/2);ctx.restore();}
- if(state.showMask&&!exportMode){ctx.save();ctx.setLineDash([7,6]);ctx.lineWidth=2;ctx.strokeStyle='#1e7bd9';ctx.beginPath();ctx.ellipse(state.mask.x,state.mask.y,state.mask.rx,state.mask.ry,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
- const l=currentLayer(); if(l&&!exportMode&&l.visible){const im=assets.get(l.assetId);if(im){ctx.save();ctx.translate(l.x,l.y);ctx.rotate(l.rotation*Math.PI/180);ctx.strokeStyle='#e85d2a';ctx.lineWidth=2/Math.max(.2,l.scale);ctx.setLineDash([5/Math.max(.2,l.scale),4/Math.max(.2,l.scale)]);ctx.scale(l.flipX?-l.scale:l.scale,l.scale);ctx.strokeRect(-im.width/2,-im.height/2,im.width,im.height);ctx.restore()}}
+const assetMap={}; [...defs.base,...defs.sauces,...defs.mains].forEach(d=>assetMap[d.id]=d);
+const state={canvas:{w:760,h:760},selected:null,layers:[],mask:{x:290,y:427,rx:126,ry:82},showMask:false,libCat:'base'};
+let uid=1;
+const canvas=$('#previewCanvas'), ctx=canvas.getContext('2d');
+
+function drawThumb(def,w=100,h=68){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const img=images[def.sheet];if(!img)return c;const r=Math.min((w-8)/def.sw,(h-8)/def.sh);const dw=def.sw*r, dh=def.sh*r; x.drawImage(img,def.sx,def.sy,def.sw,def.sh,(w-dw)/2,(h-dh)/2,dw,dh); return c;}
+function addLayer(name,assetId,opts={}){const layer={uid:'l'+uid++,name,assetId,x:380,y:390,scale:1,rotation:0,alpha:1,flipX:false,clip:false,visible:true,z:state.layers.length,...opts};state.layers.push(layer);return layer;}
+function baseRecipe(){return {sauce:$('#sauceSelect').value||defs.sauces[0].id,main:$('#mainSelect').value||defs.mains[0].id,finish:$('#finishSelect').value||'normal',layout:$('#layoutSelect').value||'standard',legs:$('#legsCheck').checked,glasses:$('#glassCheck').checked,headphones:$('#headphoneCheck').checked,steam:$('#steamCheck').checked,sparkle:$('#sparkleCheck').checked};}
+function buildRecipe(r=baseRecipe()){
+  state.layers=[];
+  addLayer('皿','plate',{x:380,y:575,scale:.78});
+  const sauceScale = r.layout==='sauceFocus' ? 1.02 : .92;
+  const mainScale = r.layout==='ingredientFocus' ? .84 : .74;
+  const saucePos = {x:298, y:431};
+  const mainPos = {x:294, y:432};
+  addLayer('液体',r.sauce,{x:saucePos.x,y:saucePos.y,scale:sauceScale,clip:true});
+  addLayer('具材',r.main,{x:mainPos.x,y:mainPos.y,scale:mainScale,rotation:r.main==='kombu'?8:r.main==='boots'?0:-6,clip:true});
+  addLayer('断面ベース','cutShell',{x:301,y:427,scale:.92});
+  addLayer('断面フレーム','cutFrame',{x:301,y:427,scale:.92});
+  if(r.legs){addLayer('足L','shoeL',{x:221,y:558,scale:.50,z:1}); addLayer('足R','shoeR',{x:355,y:571,scale:.50,z:1});}
+  if(r.glasses){addLayer('グラサン','glasses',{x:323,y:329,scale:.50});}
+  if(r.headphones){addLayer('ヘッドホン','headphones',{x:317,y:305,scale:.50});}
+  if(r.steam){addLayer('湯気','steam',{x:490,y:346,scale:.46,alpha:.95});}
+  if(r.sparkle){addLayer('キラキラ','sparkle',{x:575,y:292,scale:.85});}
+  state.selected=state.layers.at(-1)?.uid||null;
+  syncLayerList(); syncProps(); draw();
 }
-function layerHit(x,y,l){const im=assets.get(l.assetId);if(!im||!l.visible)return false;const a=-l.rotation*Math.PI/180,dx=x-l.x,dy=y-l.y;const lx=(dx*Math.cos(a)-dy*Math.sin(a))/(l.flipX?-l.scale:l.scale),ly=(dx*Math.sin(a)+dy*Math.cos(a))/l.scale;return Math.abs(lx)<=im.width/2&&Math.abs(ly)<=im.height/2}
-let drag=null;canvas.addEventListener('pointerdown',e=>{const p=screenPoint(e);let hit=null;for(let i=state.layers.length-1;i>=0;i--){if(layerHit(p.x,p.y,state.layers[i])){hit=state.layers[i];break}}if(hit){state.selected=hit.uid;drag={dx:p.x-hit.x,dy:p.y-hit.y};canvas.setPointerCapture(e.pointerId);syncAll();draw()}});canvas.addEventListener('pointermove',e=>{if(!drag)return;const l=currentLayer();if(!l)return;const p=screenPoint(e);l.x=Math.round(p.x-drag.dx);l.y=Math.round(p.y-drag.dy);syncPropOnly();draw()});canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
-function renderLibrary(cat='土台'){const cats=[...new Set([...assetDefs,...extraAssets].map(a=>a.cat))];$('#libraryTabs').innerHTML=cats.map(c=>`<button class="mini ${c===cat?'active':''}" data-cat="${c}">${c}</button>`).join('');$$('#libraryTabs button').forEach(b=>b.onclick=()=>renderLibrary(b.dataset.cat));const arr=[...assetDefs,...extraAssets].filter(a=>a.cat===cat);$('#assetGrid').innerHTML=arr.map(a=>`<div class="assetCard" data-id="${a.id}"><img src="${a.src}"><span>${a.name}</span></div>`).join('');$$('.assetCard').forEach(c=>c.onclick=()=>addAsset(c.dataset.id))}
-function renderPresets(){$('#presetRow').innerHTML=Object.entries(presets).map(([k,p])=>`<button class="mini ${state.preset===k?'primary':''}" data-p="${k}">${p.label}</button>`).join('');$$('#presetRow button').forEach(b=>b.onclick=()=>applyPreset(b.dataset.p))}
-function renderLayers(){$('#layerList').innerHTML=state.layers.map((l,i)=>`<div class="layerItem ${l.uid===state.selected?'sel':''}" data-uid="${l.uid}"><button class="eye mini" data-eye="${l.uid}">${l.visible?'●':'○'}</button><div class="layerName">${i+1}. ${l.name}</div><div class="layerBtns"><button class="mini" data-up="${l.uid}">↑</button><button class="mini" data-down="${l.uid}">↓</button></div></div>`).join('');$$('.layerItem').forEach(x=>x.onclick=e=>{if(e.target.closest('button'))return;state.selected=x.dataset.uid;syncAll();draw()});$$('[data-eye]').forEach(b=>b.onclick=()=>{const l=state.layers.find(x=>x.uid===b.dataset.eye);l.visible=!l.visible;syncAll();draw()});$$('[data-up]').forEach(b=>b.onclick=()=>moveLayer(b.dataset.up,1));$$('[data-down]').forEach(b=>b.onclick=()=>moveLayer(b.dataset.down,-1))}
-function moveLayer(uid,d){const i=state.layers.findIndex(x=>x.uid===uid),j=Math.max(0,Math.min(state.layers.length-1,i+d));if(i===j)return;const [x]=state.layers.splice(i,1);state.layers.splice(j,0,x);syncAll();draw()}
-function syncAll(){renderLayers();renderPresets();syncPropOnly();syncMask()}
-function syncPropOnly(){const l=currentLayer();$('#noLayer').hidden=!!l;$('#propControls').hidden=!l;if(!l)return;for(const [r,n,v] of [['xRange','xNum','x'],['yRange','yNum','y'],['scaleRange','scaleNum','scale'],['rotRange','rotNum','rotation'],['alphaRange','alphaNum','alpha']]){$('#'+r).value=l[v];$('#'+n).value=l[v]}$('#flipX').checked=l.flipX;$('#clipInside').checked=l.clipInside}
-function syncMask(){for(const [r,n,k] of [['maskX','maskXn','x'],['maskY','maskYn','y'],['maskRX','maskRXn','rx'],['maskRY','maskRYn','ry']]){$('#'+r).value=state.mask[k];$('#'+n).value=state.mask[k]}$('#showMask').checked=state.showMask}
-for(const [r,n,k] of [['xRange','xNum','x'],['yRange','yNum','y'],['scaleRange','scaleNum','scale'],['rotRange','rotNum','rotation'],['alphaRange','alphaNum','alpha']]){const fn=v=>{const l=currentLayer();if(!l)return;l[k]=Number(v);syncPropOnly();draw()};$('#'+r).oninput=e=>fn(e.target.value);$('#'+n).oninput=e=>fn(e.target.value)}
-$('#flipX').onchange=e=>{const l=currentLayer();if(l){l.flipX=e.target.checked;draw()}};$('#clipInside').onchange=e=>{const l=currentLayer();if(l){l.clipInside=e.target.checked;draw()}};$('#deleteLayer').onclick=()=>{state.layers=state.layers.filter(l=>l.uid!==state.selected);state.selected=state.layers.at(-1)?.uid||null;syncAll();draw()};$('#duplicateLayer').onclick=()=>{const l=currentLayer();if(!l)return;const c={...l,uid:'l'+idSeq++,name:l.name+' 複製',x:l.x+18,y:l.y+18};state.layers.push(c);state.selected=c.uid;syncAll();draw()};
-for(const [r,n,k] of [['maskX','maskXn','x'],['maskY','maskYn','y'],['maskRX','maskRXn','rx'],['maskRY','maskRYn','ry']]){const fn=v=>{state.mask[k]=Number(v);syncMask();draw()};$('#'+r).oninput=e=>fn(e.target.value);$('#'+n).oninput=e=>fn(e.target.value)}$('#showMask').onchange=e=>{state.showMask=e.target.checked;draw()};
-function exportLayout(){const data={format:'kani-dish-layout-v1',canvas:{width:720,height:720},mask:{...state.mask},layers:state.layers.map(({uid,...l})=>l)};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});downloadBlob(blob,'kani-dish-layout.json');$('#saveStatus').textContent='JSONを書き出しました。'}
-function importLayout(data){if(!data||!Array.isArray(data.layers))throw Error('不正なJSONです');state.mask={...state.mask,...data.mask};state.layers=data.layers.map(x=>({...x,uid:'l'+idSeq++}));state.selected=state.layers.at(-1)?.uid||null;Promise.all(state.layers.map(l=>{const a=getDef(l.assetId);return a?ensureAsset(a):Promise.resolve()})).then(()=>{syncAll();draw()})}
-function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-$('#exportJsonBtn').onclick=exportLayout;$('#importJsonBtn').onclick=()=>$('#jsonFile').click();$('#jsonFile').onchange=async e=>{try{importLayout(JSON.parse(await e.target.files[0].text()))}catch(err){alert(err.message)}};$('#exportPngBtn').onclick=()=>{draw(true);canvas.toBlob(b=>downloadBlob(b,'dish-preview.png'),'image/png');setTimeout(()=>draw(),20)};
-$('#addLocalAsset').onclick=()=>$('#localAssetFile').click();$('#localAssetFile').onchange=e=>{const f=e.target.files[0];if(!f)return;addUserAsset(f.name,URL.createObjectURL(f))};
-function addUserAsset(name,src){const id='user_'+Date.now()+'_'+Math.random().toString(16).slice(2);const a={id,name,cat:'ユーザー素材',src};extraAssets.push(a);renderLibrary('ユーザー素材');return a}
-$$('.tabBtn').forEach(b=>b.onclick=()=>{$$('.tabBtn').forEach(x=>x.classList.toggle('active',x===b));$$('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));if(b.dataset.view==='cropView')requestAnimationFrame(drawCrop)});
+function getLayer(){return state.layers.find(l=>l.uid===state.selected)||null;}
+function sortedLayers(){return [...state.layers].sort((a,b)=>a.z-b.z);} 
+function drawImageAsset(def,x,y,scale=1,rotation=0,alpha=1,flipX=false){const img=images[def.sheet];ctx.save();ctx.translate(x,y);ctx.rotate(rotation*Math.PI/180);ctx.scale(flipX?-1:1,1);ctx.globalAlpha=alpha; const dw=def.sw*scale, dh=def.sh*scale; ctx.drawImage(img,def.sx,def.sy,def.sw,def.sh,-dw/2,-dh/2,dw,dh); ctx.restore();}
+function drawFinishOverlay(type){ if(type==='normal') return; const shell=state.layers.find(l=>l.name==='断面フレーム') || state.layers.find(l=>l.assetId==='cutFrame'); if(!shell) return; const img=assetMap['cutFrame']; const x=shell.x, y=shell.y, sc=shell.scale; ctx.save(); ctx.translate(x,y); ctx.scale(sc,sc); ctx.beginPath(); ctx.ellipse(-10,5,210,124,-0.10,0,Math.PI*2); ctx.clip(); if(type==='golden'){ctx.fillStyle='rgba(255,180,60,.18)'; ctx.fillRect(-260,-180,520,360);} else if(type==='burnt'){ctx.fillStyle='rgba(50,20,8,.18)'; ctx.fillRect(-260,-180,520,360); drawBurnSpots(-5,0,1);} else if(type==='charcoal'){ctx.fillStyle='rgba(35,14,8,.35)'; ctx.fillRect(-260,-180,520,360); drawBurnSpots(-5,0,1.5,true);} ctx.restore(); }
+function drawBurnSpots(dx,dy,s=1,hard=false){const pts=[[-110,-48,28],[-30,-65,18],[45,-55,26],[118,-12,20],[70,42,22],[-48,58,18],[-145,15,24]]; ctx.fillStyle=hard?'rgba(30,15,10,.52)':'rgba(58,28,15,.28)'; pts.forEach(([x,y,r])=>{ctx.beginPath();ctx.ellipse(dx+x*s,dy+y*s,r*s,(r*.55)*s,Math.random()*Math.PI,0,Math.PI*2);ctx.fill();});}
+function draw(showExportBg=false){ctx.clearRect(0,0,canvas.width,canvas.height);if(showExportBg){ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);} sortedLayers().forEach(l=>{ if(!l.visible) return; const def=assetMap[l.assetId]; if(!def) return; const drawFn=()=>drawImageAsset(def,l.x,l.y,l.scale,l.rotation,l.alpha,l.flipX); if(l.clip){ ctx.save(); ctx.beginPath(); ctx.ellipse(state.mask.x,state.mask.y,state.mask.rx,state.mask.ry,-0.34,0,Math.PI*2); ctx.clip(); drawFn(); ctx.restore(); } else drawFn(); }); drawFinishOverlay($('#finishSelect').value); if(state.showMask){ ctx.save(); ctx.strokeStyle='rgba(37,99,235,.85)'; ctx.setLineDash([9,7]); ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(state.mask.x,state.mask.y,state.mask.rx,state.mask.ry,-0.34,0,Math.PI*2); ctx.stroke(); ctx.restore(); }}
+function syncSelectOptions(){ $('#sauceSelect').innerHTML=defs.sauces.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''); $('#mainSelect').innerHTML=defs.mains.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''); $('#finishSelect').innerHTML=`<option value="normal">通常</option><option value="golden">こんがり</option><option value="burnt">焦げ</option><option value="charcoal">丸焦げ</option>`; }
+function syncLayerList(){ const box=$('#layerList'); box.innerHTML=''; sortedLayers().forEach(l=>{ const div=document.createElement('div'); div.className='layerItem'+(l.uid===state.selected?' sel':''); div.innerHTML=`<button class="eye mini" data-eye="${l.uid}">${l.visible?'👁':'🚫'}</button><div class="layerName">${l.name}</div><div class="row"><button class="mini" data-up="${l.uid}">↑</button><button class="mini" data-down="${l.uid}">↓</button></div>`; div.onclick=e=>{ if(e.target.closest('button')) return; state.selected=l.uid; syncLayerList(); syncProps(); draw();}; box.appendChild(div); }); $$('[data-eye]').forEach(b=>b.onclick=e=>{e.stopPropagation(); const l=state.layers.find(x=>x.uid===b.dataset.eye); l.visible=!l.visible; syncLayerList(); draw();}); $$('[data-up]').forEach(b=>b.onclick=e=>{e.stopPropagation(); shiftLayer(b.dataset.up,1)}); $$('[data-down]').forEach(b=>b.onclick=e=>{e.stopPropagation(); shiftLayer(b.dataset.down,-1)}); }
+function shiftLayer(uid,dir){const layers=sortedLayers();const idx=layers.findIndex(l=>l.uid===uid);const target=idx+dir;if(target<0||target>=layers.length)return; const a=layers[idx], b=layers[target]; const az=a.z; a.z=b.z; b.z=az; syncLayerList(); draw(); }
+function syncProps(){const l=getLayer(); $('#layerNone').hidden=!!l; $('#layerProps').hidden=!l; if(!l) return; const bind=[['x',l.x],['y',l.y],['scale',l.scale],['rot',l.rotation],['alpha',l.alpha]]; bind.forEach(([k,v])=>{$('#'+k+'Range').value=v; $('#'+k+'Num').value=v;}); $('#flipX').checked=l.flipX; $('#clipCheck').checked=l.clip; [['maskX','x'],['maskY','y'],['maskRX','rx'],['maskRY','ry']].forEach(([id,k])=>{$('#'+id).value=state.mask[k]; $('#'+id+'n').value=state.mask[k];}); $('#showMask').checked=state.showMask; }
+[['x','x'],['y','y'],['scale','scale'],['rot','rotation'],['alpha','alpha']].forEach(([pre,key])=>{ const f=v=>{const l=getLayer(); if(!l)return; l[key]=Number(v); syncProps(); draw();}; $('#'+pre+'Range').oninput=e=>f(e.target.value); $('#'+pre+'Num').oninput=e=>f(e.target.value); });
+$('#flipX').onchange=e=>{const l=getLayer(); if(l){l.flipX=e.target.checked; draw();}}; $('#clipCheck').onchange=e=>{const l=getLayer(); if(l){l.clip=e.target.checked; draw();}}; $('#dupLayerBtn').onclick=()=>{const l=getLayer(); if(!l)return; state.layers.push({...l,uid:'l'+uid++,x:l.x+14,y:l.y+14,name:l.name+' 複製'}); syncLayerList(); draw();}; $('#delLayerBtn').onclick=()=>{state.layers=state.layers.filter(x=>x.uid!==state.selected); state.selected=state.layers.at(-1)?.uid||null; syncLayerList(); syncProps(); draw();};
+[['maskX','x'],['maskY','y'],['maskRX','rx'],['maskRY','ry']].forEach(([id,key])=>{ const f=v=>{state.mask[key]=Number(v); syncProps(); draw();}; $('#'+id).oninput=e=>f(e.target.value); $('#'+id+'n').oninput=e=>f(e.target.value); }); $('#showMask').onchange=e=>{state.showMask=e.target.checked; draw();};
 
-// ---- Crop auxiliary tool ----
-const cc=$('#cropCanvas'), cctx=cc.getContext('2d');let cropImg=null,cropName='',cropMode='rect',selection=[],drawing=false,rectStart=null,cropResultBlob=null;let cropView={scale:1,ox:0,oy:0};
-const sourceDefs=[{name:'コロッケ素材シート',src:'assets/source/croquette_sheet.png'},{name:'具材素材シート',src:'assets/source/fill_sheet.png'},{name:'DJ素材シート',src:'assets/source/dj_sheet.png'}];
-$('#sourceThumbs').innerHTML=sourceDefs.map((s,i)=>`<button class="sourceThumb" data-src="${s.src}" data-name="${s.name}"><img src="${s.src}"><span>${s.name}</span></button>`).join('');$$('.sourceThumb').forEach(b=>b.onclick=()=>loadCropSource(b.dataset.src,b.dataset.name));
-async function loadCropSource(src,name){cropImg=await loadImage(src);cropName=name;$('#cropSourceName').textContent=name;selection=[];fitCrop();drawCrop()}
-function fitCrop(){if(!cropImg)return;const sx=(cc.width-30)/cropImg.width,sy=(cc.height-30)/cropImg.height;cropView.scale=Math.min(sx,sy);cropView.ox=(cc.width-cropImg.width*cropView.scale)/2;cropView.oy=(cc.height-cropImg.height*cropView.scale)/2}
-function cropCanvasPt(e){const r=cc.getBoundingClientRect();return{x:(e.clientX-r.left)*cc.width/r.width,y:(e.clientY-r.top)*cc.height/r.height}}
-function toImagePt(p){return{x:(p.x-cropView.ox)/cropView.scale,y:(p.y-cropView.oy)/cropView.scale}}
-function toCanvasPt(p){return{x:p.x*cropView.scale+cropView.ox,y:p.y*cropView.scale+cropView.oy}}
-function drawCrop(){cctx.clearRect(0,0,cc.width,cc.height);cctx.fillStyle='#d9d4ca';cctx.fillRect(0,0,cc.width,cc.height);if(!cropImg)return;cctx.drawImage(cropImg,cropView.ox,cropView.oy,cropImg.width*cropView.scale,cropImg.height*cropView.scale);if(selection.length){cctx.save();cctx.strokeStyle='#ff4d22';cctx.fillStyle='#ff5c2225';cctx.lineWidth=2;cctx.beginPath();const p0=toCanvasPt(selection[0]);cctx.moveTo(p0.x,p0.y);for(let i=1;i<selection.length;i++){const p=toCanvasPt(selection[i]);cctx.lineTo(p.x,p.y)}if(cropMode==='rect'||(cropMode==='free'&&!drawing))cctx.closePath();cctx.fill();cctx.stroke();selection.forEach(p=>{const q=toCanvasPt(p);cctx.fillStyle='#fff';cctx.strokeStyle='#ff4d22';cctx.beginPath();cctx.arc(q.x,q.y,4,0,Math.PI*2);cctx.fill();cctx.stroke()});cctx.restore()}}
-$$('[data-cropmode]').forEach(b=>b.onclick=()=>{$$('[data-cropmode]').forEach(x=>x.classList.toggle('active',x===b));cropMode=b.dataset.cropmode;selection=[];drawCrop()});$('#clearSelection').onclick=()=>{selection=[];drawCrop()};
-cc.addEventListener('pointerdown',e=>{if(!cropImg)return;const ip=toImagePt(cropCanvasPt(e));if(cropMode==='rect'){drawing=true;rectStart=ip;selection=[ip,ip,{...ip},{...ip}]}else if(cropMode==='free'){drawing=true;selection=[ip];cc.setPointerCapture(e.pointerId)}else if(cropMode==='polygon'){selection.push(ip);drawCrop()}});
-cc.addEventListener('pointermove',e=>{if(!drawing)return;const ip=toImagePt(cropCanvasPt(e));if(cropMode==='rect'){const a=rectStart,b=ip;selection=[{x:a.x,y:a.y},{x:b.x,y:a.y},{x:b.x,y:b.y},{x:a.x,y:b.y}]}else if(cropMode==='free'){const last=selection.at(-1);if(!last||Math.hypot(last.x-ip.x,last.y-ip.y)>5/cropView.scale)selection.push(ip)}drawCrop()});cc.addEventListener('pointerup',()=>{drawing=false;drawCrop()});cc.addEventListener('dblclick',()=>{if(cropMode==='polygon'&&selection.length>=3)drawCrop()});
-cc.addEventListener('wheel',e=>{if(!cropImg)return;e.preventDefault();const p=cropCanvasPt(e),old=cropView.scale,f=e.deltaY<0?1.12:.89;cropView.scale=Math.max(.08,Math.min(5,old*f));const ix=(p.x-cropView.ox)/old,iy=(p.y-cropView.oy)/old;cropView.ox=p.x-ix*cropView.scale;cropView.oy=p.y-iy*cropView.scale;drawCrop()},{passive:false});
-let pan=null;cc.addEventListener('mousedown',e=>{if(e.button===1||e.shiftKey){pan={x:e.clientX,y:e.clientY,ox:cropView.ox,oy:cropView.oy};e.preventDefault()}});window.addEventListener('mousemove',e=>{if(pan){cropView.ox=pan.ox+(e.clientX-pan.x);cropView.oy=pan.oy+(e.clientY-pan.y);drawCrop()}});window.addEventListener('mouseup',()=>pan=null);
-$('#cropPadding').oninput=e=>$('#padLabel').textContent=e.target.value+' px';$('#openCropFile').onclick=()=>$('#cropFile').click();$('#cropFile').onchange=e=>{const f=e.target.files[0];if(f)loadCropSource(URL.createObjectURL(f),f.name)};
-function makeCrop(){if(!cropImg||selection.length<3){alert('切り抜き範囲を作ってください');return null}const pad=Number($('#cropPadding').value),xs=selection.map(p=>p.x),ys=selection.map(p=>p.y);let minX=Math.floor(Math.max(0,Math.min(...xs))),maxX=Math.ceil(Math.min(cropImg.width,Math.max(...xs))),minY=Math.floor(Math.max(0,Math.min(...ys))),maxY=Math.ceil(Math.min(cropImg.height,Math.max(...ys)));if(maxX<=minX||maxY<=minY)return null;const o=document.createElement('canvas');o.width=maxX-minX+pad*2;o.height=maxY-minY+pad*2;const ox=o.getContext('2d');ox.save();ox.beginPath();selection.forEach((p,i)=>{const x=p.x-minX+pad,y=p.y-minY+pad;i?ox.lineTo(x,y):ox.moveTo(x,y)});ox.closePath();ox.clip();ox.drawImage(cropImg,-minX+pad,-minY+pad);ox.restore();o.toBlob(b=>{cropResultBlob=b;const url=URL.createObjectURL(b);$('#cropResult').src=url},'image/png');return o}
-$('#makeCrop').onclick=makeCrop;$('#downloadCrop').onclick=()=>{if(!cropResultBlob){makeCrop();setTimeout(()=>cropResultBlob&&downloadBlob(cropResultBlob,'cropped-asset.png'),100)}else downloadBlob(cropResultBlob,'cropped-asset.png')};$('#addCropToLibrary').onclick=()=>{if(!cropResultBlob){alert('先に切り抜きを作成してください');return}const name=$('#cropAssetName').value.trim()||'切り抜き素材';const src=URL.createObjectURL(cropResultBlob);addUserAsset(name,src);alert('素材ライブラリの「ユーザー素材」に追加しました。')};
+function renderAssetGrid(){ const grid=$('#assetGrid'); let list=[]; if(state.libCat==='base') list=[assetMap.plate,assetMap.cutShell,assetMap.cutFrame]; else if(state.libCat==='sauce') list=defs.sauces; else if(state.libCat==='main') list=defs.mains; else if(state.libCat==='extra') list=[assetMap.shoeL,assetMap.shoeR,assetMap.glasses,assetMap.headphones,assetMap.steam,assetMap.sparkle]; grid.innerHTML=''; list.forEach(def=>{ const card=document.createElement('div'); card.className='assetCard'; const thumb=drawThumb(def); card.appendChild(thumb); const sp=document.createElement('span'); sp.textContent=def.name; card.appendChild(sp); card.onclick=()=>applyAssetToSelected(def.id); grid.appendChild(card); }); }
+function applyAssetToSelected(assetId){ const l=getLayer(); if(!l){ alert('先に右のレイヤー一覧から差し替えたいレイヤーを選択してください。'); return; } l.assetId=assetId; l.name=assetMap[assetId].name; if(defs.sauces.some(s=>s.id===assetId)) l.clip=true; syncLayerList(); draw(); }
+$$('.libTab').forEach(btn=>btn.onclick=()=>{$$('.libTab').forEach(b=>b.classList.remove('blue')); btn.classList.add('blue'); state.libCat=btn.dataset.cat; renderAssetGrid();});
 
-(async()=>{renderLibrary('土台');renderPresets();await Promise.all(assetDefs.map(a=>ensureAsset(a)));await applyPreset('crabCream');loadCropSource(sourceDefs[1].src,sourceDefs[1].name)})();
+function renderComboGrid(){ const holder=$('#comboGrid'); holder.innerHTML=''; const finish=$('#finishSelect').value; defs.mains.forEach(main=>{ defs.sauces.forEach(sauce=>{ const c=document.createElement('div'); c.className='comboCard'; const cv=document.createElement('canvas'); cv.width=220; cv.height=170; const x=cv.getContext('2d'); drawDishThumbnail(x,cv.width,cv.height,{main:main.id,sauce:sauce.id,finish,legs:$('#legsCheck').checked,glasses:$('#glassCheck').checked,headphones:$('#headphoneCheck').checked,steam:$('#steamCheck').checked,sparkle:$('#sparkleCheck').checked}); c.appendChild(cv); const cap=document.createElement('div'); cap.className='cap'; cap.textContent=`${main.name} × ${sauce.name}`; c.appendChild(cap); c.onclick=()=>{ $('#mainSelect').value=main.id; $('#sauceSelect').value=sauce.id; buildRecipe(baseRecipe()); }; holder.appendChild(c); }); }); }
+function drawDishThumbnail(x,w,h,r){ x.clearRect(0,0,w,h); x.fillStyle='#fbf7ef'; x.fillRect(0,0,w,h); const draw=(def,dx,dy,sc,rot=0,alpha=1,clip=false)=>{ const img=images[def.sheet]; x.save(); if(clip){ x.beginPath(); x.ellipse(82,94,36,23,-0.34,0,Math.PI*2); x.clip(); } x.translate(dx,dy); x.rotate(rot*Math.PI/180); x.globalAlpha=alpha; const dw=def.sw*sc, dh=def.sh*sc; x.drawImage(img,def.sx,def.sy,def.sw,def.sh,-dw/2,-dh/2,dw,dh); x.restore(); };
+  draw(assetMap.plate,110,132,.23); draw(assetMap[r.sauce],82,95,.26,0,1,true); draw(assetMap[r.main],81,94,.21,-5,1,true); draw(assetMap.cutShell,83,94,.26); draw(assetMap.cutFrame,83,94,.26); if(r.legs){draw(assetMap.shoeL,57,130,.14);draw(assetMap.shoeR,96,133,.14);} if(r.glasses) draw(assetMap.glasses,90,59,.14); if(r.headphones) draw(assetMap.headphones,88,48,.15); if(r.steam) draw(assetMap.steam,142,63,.14); if(r.sparkle) draw(assetMap.sparkle,168,52,.26); // finish overlay
+  if(r.finish!=='normal'){ x.save(); x.translate(83,94); x.scale(.26,.26); x.beginPath(); x.ellipse(-10,5,210,124,-0.10,0,Math.PI*2); x.clip(); if(r.finish==='golden'){x.fillStyle='rgba(255,180,60,.18)'; x.fillRect(-260,-180,520,360);} else if(r.finish==='burnt'){x.fillStyle='rgba(50,20,8,.18)';x.fillRect(-260,-180,520,360);} else {x.fillStyle='rgba(35,14,8,.35)';x.fillRect(-260,-180,520,360);} x.restore(); }
+}
+
+// Dragging on preview canvas
+let drag=null; function canvasPoint(e){ const r=canvas.getBoundingClientRect(); return {x:(e.clientX-r.left)*canvas.width/r.width, y:(e.clientY-r.top)*canvas.height/r.height}; }
+function hitLayer(pt){ const list=sortedLayers().slice().reverse(); for(const l of list){ if(!l.visible) continue; const def=assetMap[l.assetId]; const dw=def.sw*l.scale, dh=def.sh*l.scale; const dx=Math.abs(pt.x-l.x), dy=Math.abs(pt.y-l.y); if(dx<=dw/2 && dy<=dh/2) return l; } return null; }
+canvas.addEventListener('pointerdown',e=>{ const pt=canvasPoint(e); const l=hitLayer(pt); if(l){ state.selected=l.uid; syncLayerList(); syncProps(); drag={uid:l.uid,dx:pt.x-l.x,dy:pt.y-l.y}; canvas.setPointerCapture(e.pointerId); draw(); }});
+canvas.addEventListener('pointermove',e=>{ if(!drag) return; const pt=canvasPoint(e); const l=state.layers.find(x=>x.uid===drag.uid); if(!l) return; l.x=pt.x-drag.dx; l.y=pt.y-drag.dy; syncProps(); draw(); });
+canvas.addEventListener('pointerup',()=>drag=null); canvas.addEventListener('pointerleave',()=>drag=null);
+
+// Export/import
+function exportLayout(){ const data={format:'kani-dish-v2',mask:state.mask,recipe:baseRecipe(),layers:state.layers.map(({uid,...rest})=>rest)}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); downloadBlob(blob,'kani-dish-layout-v2.json'); }
+function importLayout(obj){ if(!obj || !Array.isArray(obj.layers)) throw new Error('不正なJSONです'); state.mask={...state.mask,...obj.mask}; if(obj.recipe){ $('#sauceSelect').value=obj.recipe.sauce||$('#sauceSelect').value; $('#mainSelect').value=obj.recipe.main||$('#mainSelect').value; $('#finishSelect').value=obj.recipe.finish||$('#finishSelect').value; $('#layoutSelect').value=obj.recipe.layout||$('#layoutSelect').value; $('#legsCheck').checked=!!obj.recipe.legs; $('#glassCheck').checked=!!obj.recipe.glasses; $('#headphoneCheck').checked=!!obj.recipe.headphones; $('#steamCheck').checked=!!obj.recipe.steam; $('#sparkleCheck').checked=!!obj.recipe.sparkle; }
+  state.layers=obj.layers.map(l=>({...l,uid:'l'+uid++})); state.selected=state.layers.at(-1)?.uid||null; syncLayerList(); syncProps(); draw(); }
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1200);} $('#exportJsonBtn').onclick=exportLayout; $('#importJsonBtn').onclick=()=>$('#jsonFile').click(); $('#jsonFile').onchange=async e=>{ try{ importLayout(JSON.parse(await e.target.files[0].text())); } catch(err){ alert(err.message); } }; $('#exportPngBtn').onclick=()=>{ draw(true); canvas.toBlob(b=>downloadBlob(b,'dish-preview.png'),'image/png'); setTimeout(()=>draw(),20); };
+
+// Buttons
+$('#applyBasePreset').onclick=()=>buildRecipe(baseRecipe()); $('#resetLayoutBtn').onclick=()=>buildRecipe(baseRecipe()); $('#buildComboGrid').onclick=renderComboGrid;
+
+// Crop helper
+const cropCanvas=$('#cropCanvas'), cctx=cropCanvas.getContext('2d'); let cropImg=null,cropName='',cropMode='rect',selection=[],drawing=false,startPt=null,resultBlob=null,view={scale:1,ox:0,oy:0};
+const cropSources=[{name:'コロッケ素材シート',path:sheetPaths.base,sheet:'base'},{name:'具材素材シート',path:sheetPaths.fill,sheet:'fill'}];
+function renderSourceThumbs(){ const box=$('#sourceThumbs'); box.innerHTML=''; cropSources.forEach(s=>{ const btn=document.createElement('button'); btn.className='sourceThumb'; const cv=drawThumb({sheet:s.sheet,sx:0,sy:0,sw:images[s.sheet].width,sh:images[s.sheet].height},72,52); btn.appendChild(cv); const sp=document.createElement('span'); sp.textContent=s.name; btn.appendChild(sp); btn.onclick=()=>loadCropSource(s.path,s.name); box.appendChild(btn); }); }
+async function loadCropSource(src,name){ cropImg=await loadImage(src); cropName=name; fitCrop(); selection=[]; drawCrop(); }
+function fitCrop(){ if(!cropImg) return; const sx=(cropCanvas.width-30)/cropImg.width, sy=(cropCanvas.height-30)/cropImg.height; view.scale=Math.min(sx,sy); view.ox=(cropCanvas.width-cropImg.width*view.scale)/2; view.oy=(cropCanvas.height-cropImg.height*view.scale)/2; }
+function cToImg(p){ return {x:(p.x-view.ox)/view.scale,y:(p.y-view.oy)/view.scale}; } function imgToC(p){ return {x:p.x*view.scale+view.ox, y:p.y*view.scale+view.oy}; } function cropPt(e){ const r=cropCanvas.getBoundingClientRect(); return {x:(e.clientX-r.left)*cropCanvas.width/r.width, y:(e.clientY-r.top)*cropCanvas.height/r.height}; }
+function drawCrop(){ cctx.clearRect(0,0,cropCanvas.width,cropCanvas.height); cctx.fillStyle='#d8d0c4'; cctx.fillRect(0,0,cropCanvas.width,cropCanvas.height); if(!cropImg) return; cctx.drawImage(cropImg,view.ox,view.oy,cropImg.width*view.scale,cropImg.height*view.scale); if(selection.length){ cctx.save(); cctx.strokeStyle='#ef5428'; cctx.fillStyle='rgba(239,84,40,.2)'; cctx.lineWidth=2; cctx.beginPath(); const p0=imgToC(selection[0]); cctx.moveTo(p0.x,p0.y); for(let i=1;i<selection.length;i++){ const p=imgToC(selection[i]); cctx.lineTo(p.x,p.y); } if(cropMode==='rect' || (cropMode==='free'&&!drawing)) cctx.closePath(); cctx.fill(); cctx.stroke(); cctx.restore(); }}
+$$('[data-mode]').forEach(b=>b.onclick=()=>{$$('[data-mode]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); cropMode=b.dataset.mode; selection=[]; drawCrop();}); $('#clearCropSel').onclick=()=>{selection=[]; drawCrop();};
+cropCanvas.addEventListener('pointerdown',e=>{ if(!cropImg) return; const p=cToImg(cropPt(e)); if(cropMode==='rect'){drawing=true; startPt=p; selection=[p,p,{...p},{...p}];} else if(cropMode==='polygon'){selection.push(p); drawCrop();} else {drawing=true; selection=[p]; cropCanvas.setPointerCapture(e.pointerId);} });
+cropCanvas.addEventListener('pointermove',e=>{ if(!drawing) return; const p=cToImg(cropPt(e)); if(cropMode==='rect'){ const a=startPt,b=p; selection=[{x:a.x,y:a.y},{x:b.x,y:a.y},{x:b.x,y:b.y},{x:a.x,y:b.y}]; } else if(cropMode==='free'){ const last=selection.at(-1); if(!last || Math.hypot(last.x-p.x,last.y-p.y)>5/view.scale) selection.push(p); } drawCrop(); });
+cropCanvas.addEventListener('pointerup',()=>{drawing=false; drawCrop();}); cropCanvas.addEventListener('wheel',e=>{ if(!cropImg) return; e.preventDefault(); const p=cropPt(e), old=view.scale, mul=e.deltaY<0?1.12:.89; view.scale=Math.max(.08,Math.min(5,old*mul)); const ix=(p.x-view.ox)/old, iy=(p.y-view.oy)/old; view.ox=p.x-ix*view.scale; view.oy=p.y-iy*view.scale; drawCrop(); },{passive:false});
+$('#cropPad').oninput=e=>$('#cropPadNum').value=e.target.value; $('#cropPadNum').oninput=e=>$('#cropPad').value=e.target.value;
+function makeCrop(){ if(!cropImg || selection.length<3){ alert('切り抜き範囲を作ってください。'); return; } const pad=Number($('#cropPad').value); const xs=selection.map(p=>p.x), ys=selection.map(p=>p.y); const minX=Math.max(0,Math.floor(Math.min(...xs))), maxX=Math.min(cropImg.width,Math.ceil(Math.max(...xs))), minY=Math.max(0,Math.floor(Math.min(...ys))), maxY=Math.min(cropImg.height,Math.ceil(Math.max(...ys))); const out=document.createElement('canvas'); out.width=maxX-minX+pad*2; out.height=maxY-minY+pad*2; const ox=out.getContext('2d'); ox.beginPath(); selection.forEach((p,i)=>{const x=p.x-minX+pad,y=p.y-minY+pad; i?ox.lineTo(x,y):ox.moveTo(x,y);}); ox.closePath(); ox.clip(); ox.drawImage(cropImg,-minX+pad,-minY+pad); out.toBlob(b=>{ resultBlob=b; $('#cropResult').src=URL.createObjectURL(b); },'image/png'); }
+$('#makeCropBtn').onclick=makeCrop; $('#saveCropBtn').onclick=()=>{ if(!resultBlob){ makeCrop(); setTimeout(()=>{if(resultBlob) downloadBlob(resultBlob,'cropped-asset.png');},120); } else downloadBlob(resultBlob,'cropped-asset.png'); };
+
+// Tabs
+$$('.tabBtn').forEach(btn=>btn.onclick=()=>{ $$('.tabBtn').forEach(b=>b.classList.toggle('active',b===btn)); $$('.view').forEach(v=>v.classList.toggle('active',v.id===btn.dataset.view)); if(btn.dataset.view==='cropView') drawCrop(); });
+
+(async function init(){ images.base=await loadImage(sheetPaths.base); images.fill=await loadImage(sheetPaths.fill); syncSelectOptions(); renderAssetGrid(); renderSourceThumbs(); buildRecipe({sauce:'cream',main:'crabShred',finish:'normal',layout:'standard',legs:false,glasses:false,headphones:false,steam:false,sparkle:false}); renderComboGrid(); await loadCropSource(sheetPaths.fill,'具材素材シート'); })();
 </script>
-</body></html>
+</body>
+</html>
