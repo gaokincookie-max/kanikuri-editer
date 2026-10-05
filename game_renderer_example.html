@@ -1,0 +1,11 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Game Renderer Example</title><style>body{font-family:system-ui,sans-serif;background:#f6f0e3;margin:0;padding:16px}canvas{max-width:100%;height:auto;display:block;margin:auto;box-shadow:0 10px 30px rgba(0,0,0,.15)}.wrap{max-width:860px;margin:auto}.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.small{font-size:12px;color:#555}</style></head><body><div class="wrap"><h1>共通 Canvas レンダラーのゲーム側サンプル</h1><div class="small">このページは preview tool と同じ renderer.js を使って料理を描画します。</div><div class="row"><button id="normal">通常</button><button id="burnt">焦げ</button><button id="dj">DJ</button><button id="run">逃げる</button></div><canvas id="gameCanvas" width="760" height="760"></canvas></div><script src="renderer.js"></script><script>
+const R=window.KaniDishRenderer; const canvas=document.getElementById('gameCanvas'); const ctx=canvas.getContext('2d');
+function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+(async function(){const images={base:await loadImage('assets/croquette_sheet.png'), fill:await loadImage('assets/fill_sheet.png')}; const global=R.createDefaultGlobal(), mask=R.createDefaultMask();
+function show(recipe){const layers=R.buildRecipeLayers(recipe,global,mask); R.renderDish(ctx,images,{layers,mask,recipe},{backgroundFill:'#fff'});} show({sauce:'cream',main:'crabShred',finish:'normal'});
+document.getElementById('normal').onclick=()=>show({sauce:'cream',main:'crabShred',finish:'normal'});
+document.getElementById('burnt').onclick=()=>show({sauce:'mayo',main:'kanikama',finish:'burnt'});
+document.getElementById('dj').onclick=()=>show({sauce:'custard',main:'crabPieces',finish:'golden',glasses:true,headphones:true,sparkle:true,steam:true});
+document.getElementById('run').onclick=()=>show({sauce:'mysteryPurple',main:'kombu',finish:'normal',legs:true});
+})();
+</script></body></html>
