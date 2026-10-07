@@ -37,21 +37,21 @@
   const defaultMask={x:276,y:430,rx:118,ry:78,rotation:-0.34};
   // Completion-image style: whole croquette behind/right, cut face in front/left.
   const defaultSlots={
-    plate:{x:380,y:566,scale:.77,rotation:0,z:0},
-    backBody:{x:452,y:416,scale:.69,rotation:0,z:1},
-    sauce:{x:276,y:430,scale:.88,rotation:-4,z:2,clip:true},
-    main:{x:276,y:430,scale:.72,rotation:-8,z:3,clip:true},
-    cutFrame:{x:283,y:429,scale:.82,rotation:0,z:4},
-    shoeL:{x:235,y:570,scale:.48,rotation:0,z:-1},
-    shoeR:{x:363,y:580,scale:.48,rotation:0,z:-1},
-    glasses:{x:300,y:345,scale:.46,rotation:0,z:5},
-    headphones:{x:310,y:315,scale:.44,rotation:0,z:5},
-    steam:{x:510,y:350,scale:.43,rotation:0,z:6},
-    sparkle:{x:585,y:300,scale:.88,rotation:0,z:6}
+    plate:{x:380,y:566,scale:.77,rotation:0,z:0,alpha:1,flipX:false,visible:true},
+    backBody:{x:452,y:416,scale:.69,rotation:0,z:1,alpha:1,flipX:false,visible:true},
+    sauce:{x:276,y:430,scale:.88,rotation:-4,z:2,clip:true,alpha:1,flipX:false,visible:true},
+    main:{x:276,y:430,scale:.72,rotation:-8,z:3,clip:true,alpha:1,flipX:false,visible:true},
+    cutFrame:{x:283,y:429,scale:.82,rotation:0,z:4,alpha:1,flipX:false,visible:true},
+    shoeL:{x:235,y:570,scale:.48,rotation:0,z:-1,alpha:1,flipX:false,visible:true},
+    shoeR:{x:363,y:580,scale:.48,rotation:0,z:-1,alpha:1,flipX:false,visible:true},
+    glasses:{x:300,y:345,scale:.46,rotation:0,z:5,alpha:1,flipX:false,visible:true},
+    headphones:{x:310,y:315,scale:.44,rotation:0,z:5,alpha:1,flipX:false,visible:true},
+    steam:{x:510,y:350,scale:.43,rotation:0,z:6,alpha:.95,flipX:false,visible:true},
+    sparkle:{x:585,y:300,scale:.88,rotation:0,z:6,alpha:1,flipX:false,visible:true}
   };
   const clone=o=>JSON.parse(JSON.stringify(o));
   function createDefaultMask(){return clone(defaultMask);} function createDefaultSlots(){return clone(defaultSlots);} function normalizeRecipe(r){return Object.assign({},clone(defaultRecipe),r||{});}  
-  function layer(role,name,assetId,slot,extra={}){return Object.assign({uid:'',role,name,assetId,x:slot.x,y:slot.y,scale:slot.scale,rotation:slot.rotation||0,alpha:1,flipX:false,clip:!!slot.clip,visible:true,z:slot.z||0,bound:true},extra);}
+  function layer(role,name,assetId,slot,extra={}){return Object.assign({uid:'',role,name,assetId,x:slot.x,y:slot.y,scale:slot.scale,rotation:slot.rotation||0,alpha:slot.alpha==null?1:Number(slot.alpha),flipX:!!slot.flipX,clip:!!slot.clip,visible:slot.visible!==false,z:slot.z||0,bound:true},extra);}
   function buildRecipeLayers(recipe, slots, mask){
     const r=normalizeRecipe(recipe), s=slots||createDefaultSlots();
     const out=[];
@@ -63,7 +63,7 @@
     if(r.legs){out.push(layer('shoeL','足L','shoeL',s.shoeL));out.push(layer('shoeR','足R','shoeR',s.shoeR));}
     if(r.glasses)out.push(layer('glasses','グラサン','glasses',s.glasses));
     if(r.headphones)out.push(layer('headphones','ヘッドホン','headphones',s.headphones));
-    if(r.steam)out.push(layer('steam','湯気','steam',s.steam,{alpha:.95}));
+    if(r.steam)out.push(layer('steam','湯気','steam',s.steam));
     if(r.sparkle)out.push(layer('sparkle','キラキラ','sparkle',s.sparkle));
     return out;
   }
