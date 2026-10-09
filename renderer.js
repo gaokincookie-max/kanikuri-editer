@@ -2,34 +2,34 @@
 (function(global){
   const defs={
     base:[
-      {id:'plate',name:'皿',src:'assets/plate.png',cat:'base'},
-      {id:'cutFrame',name:'断面フレーム',src:'assets/cutFrame.png',cat:'base'},
-      {id:'whole',name:'丸ごとコロッケ',src:'assets/whole.png',cat:'base'},
-      {id:'shoeL',name:'足L',src:'assets/shoeL.png',cat:'extra'},
-      {id:'shoeR',name:'足R',src:'assets/shoeR.png',cat:'extra'},
-      {id:'glasses',name:'グラサン',src:'assets/glasses.png',cat:'extra'},
-      {id:'headphones',name:'ヘッドホン',src:'assets/headphones.png',cat:'extra'},
-      {id:'steam',name:'湯気',src:'assets/steam.png',cat:'extra'},
-      {id:'sparkle',name:'キラキラ',src:'assets/sparkle.png',cat:'extra'}
+      {id:'plate',name:'皿',src:'assets/dishgen/plate.png',cat:'base'},
+      {id:'cutFrame',name:'断面フレーム',src:'assets/dishgen/cutFrame.png',cat:'base'},
+      {id:'whole',name:'丸ごとコロッケ',src:'assets/dishgen/whole.png',cat:'base'},
+      {id:'shoeL',name:'足L',src:'assets/dishgen/shoeL.png',cat:'extra'},
+      {id:'shoeR',name:'足R',src:'assets/dishgen/shoeR.png',cat:'extra'},
+      {id:'glasses',name:'グラサン',src:'assets/dishgen/glasses.png',cat:'extra'},
+      {id:'headphones',name:'ヘッドホン',src:'assets/dishgen/headphones.png',cat:'extra'},
+      {id:'steam',name:'湯気',src:'assets/dishgen/steam.png',cat:'extra'},
+      {id:'sparkle',name:'キラキラ',src:'assets/dishgen/sparkle.png',cat:'extra'}
     ],
     sauces:[
-      {id:'cream',name:'クリーム',src:'assets/cream.png',cat:'sauce'},
-      {id:'ice',name:'アイス系',src:'assets/ice.png',cat:'sauce'},
-      {id:'mayo',name:'マヨ系',src:'assets/mayo.png',cat:'sauce'},
-      {id:'yogurt',name:'ヨーグルト系',src:'assets/yogurt.png',cat:'sauce'},
-      {id:'mysteryPurple',name:'謎の液体A',src:'assets/mysteryPurple.png',cat:'sauce'},
-      {id:'whiteSauce',name:'ホワイトソース',src:'assets/whiteSauce.png',cat:'sauce'},
-      {id:'milk',name:'ミルク系',src:'assets/milk.png',cat:'sauce'},
-      {id:'custard',name:'カスタード系',src:'assets/custard.png',cat:'sauce'}
+      {id:'cream',name:'クリーム',src:'assets/dishgen/cream.png',cat:'sauce'},
+      {id:'ice',name:'アイス系',src:'assets/dishgen/ice.png',cat:'sauce'},
+      {id:'mayo',name:'マヨ系',src:'assets/dishgen/mayo.png',cat:'sauce'},
+      {id:'yogurt',name:'ヨーグルト系',src:'assets/dishgen/yogurt.png',cat:'sauce'},
+      {id:'mysteryPurple',name:'謎の液体A',src:'assets/dishgen/mysteryPurple.png',cat:'sauce'},
+      {id:'whiteSauce',name:'ホワイトソース',src:'assets/dishgen/whiteSauce.png',cat:'sauce'},
+      {id:'milk',name:'ミルク系',src:'assets/dishgen/milk.png',cat:'sauce'},
+      {id:'custard',name:'カスタード系',src:'assets/dishgen/custard.png',cat:'sauce'}
     ],
     mains:[
-      {id:'crabShred',name:'カニほぐし',src:'assets/crabShred.png',cat:'main'},
-      {id:'kanikama',name:'カニカマ',src:'assets/kanikama.png',cat:'main'},
-      {id:'kombu',name:'昆布',src:'assets/kombu.png',cat:'main'},
-      {id:'starfish',name:'ヒトデ',src:'assets/starfish.png',cat:'main'},
-      {id:'boots',name:'長靴',src:'assets/boots.png',cat:'main'},
-      {id:'gloves',name:'手袋',src:'assets/gloves.png',cat:'main'},
-      {id:'crabPieces',name:'カニ身ごろ',src:'assets/crabPieces.png',cat:'main'}
+      {id:'crabShred',name:'カニほぐし',src:'assets/dishgen/crabShred.png',cat:'main'},
+      {id:'kanikama',name:'カニカマ',src:'assets/dishgen/kanikama.png',cat:'main'},
+      {id:'kombu',name:'昆布',src:'assets/dishgen/kombu.png',cat:'main'},
+      {id:'starfish',name:'ヒトデ',src:'assets/dishgen/starfish.png',cat:'main'},
+      {id:'boots',name:'長靴',src:'assets/dishgen/boots.png',cat:'main'},
+      {id:'gloves',name:'手袋',src:'assets/dishgen/gloves.png',cat:'main'},
+      {id:'crabPieces',name:'カニ身ごろ',src:'assets/dishgen/crabPieces.png',cat:'main'}
     ]
   };
   const assetMap={}; [...defs.base,...defs.sauces,...defs.mains].forEach(d=>assetMap[d.id]=d);
