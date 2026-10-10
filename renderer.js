@@ -11,12 +11,10 @@
       {id:'headphones',name:'ヘッドホン',src:'assets/dishgen/headphones.png',cat:'extra'},
       {id:'steam',name:'湯気',src:'assets/dishgen/steam.png',cat:'extra'},
       {id:'sparkle',name:'キラキラ',src:'assets/dishgen/sparkle.png',cat:'extra'},
-      {id:'finishGoldenWhole',name:'焼き(全体/こんがり)',src:'assets/dishgen/finish/golden_whole.png',cat:'finish'},
-      {id:'finishGoldenCut',name:'焼き(断面/こんがり)',src:'assets/dishgen/finish/golden_cut.png',cat:'finish'},
-      {id:'finishBurntWhole',name:'焼き(全体/焦げ)',src:'assets/dishgen/finish/burnt_whole.png',cat:'finish'},
-      {id:'finishBurntCut',name:'焼き(断面/焦げ)',src:'assets/dishgen/finish/burnt_cut.png',cat:'finish'},
-      {id:'finishCharcoalWhole',name:'焼き(全体/丸焦げ)',src:'assets/dishgen/finish/charcoal_whole.png',cat:'finish'},
-      {id:'finishCharcoalCut',name:'焼き(断面/丸焦げ)',src:'assets/dishgen/finish/charcoal_cut.png',cat:'finish'}
+      {id:'finishGoldenWhole',name:'焼き(全体/奇跡の火入れ)',src:'assets/dishgen/finish/golden_whole.png',cat:'finish'},
+      {id:'finishGoldenCut',name:'焼き(断面/奇跡の火入れ)',src:'assets/dishgen/finish/golden_cut.png',cat:'finish'},
+      {id:'finishCharcoalWhole',name:'焼き(全体/黒焦げ)',src:'assets/dishgen/finish/charcoal_whole.png',cat:'finish'},
+      {id:'finishCharcoalCut',name:'焼き(断面/黒焦げ)',src:'assets/dishgen/finish/charcoal_cut.png',cat:'finish'}
     ],
     sauces:[
       {id:'cream',name:'クリーム',src:'assets/dishgen/cream.png',cat:'sauce'},
@@ -74,33 +72,7 @@
     return out;
   }
   function drawImageAsset(ctx,images,l){const img=images[l.assetId];if(!img)return;ctx.save();ctx.translate(l.x,l.y);ctx.rotate((l.rotation||0)*Math.PI/180);ctx.scale(l.flipX?-1:1,1);ctx.globalAlpha=l.alpha??1;const w=img.width*l.scale,h=img.height*l.scale;ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();}
-  function drawFinishOverlay(ctx,images,layers,finish){
-    if(!finish||finish==='normal')return;
-    const whole=layers.find(l=>l.role==='backBody');
-    const frame=layers.find(l=>l.role==='cutFrame');
-    const finishMap={
-      golden:{whole:'finishGoldenWhole',cut:'finishGoldenCut'},
-      burnt:{whole:'finishBurntWhole',cut:'finishBurntCut'},
-      charcoal:{whole:'finishCharcoalWhole',cut:'finishCharcoalCut'}
-    };
-    const pair=finishMap[finish];
-    if(!pair)return;
-    const drawLayer=(target,assetId)=>{
-      if(!target||!assetId)return;
-      const img=images[assetId];
-      if(!img)return;
-      ctx.save();
-      ctx.translate(target.x,target.y);
-      ctx.rotate((target.rotation||0)*Math.PI/180);
-      ctx.scale(target.flipX?-1:1,1);
-      ctx.globalAlpha=(target.alpha==null?1:Number(target.alpha));
-      const w=img.width*target.scale,h=img.height*target.scale;
-      ctx.drawImage(img,-w/2,-h/2,w,h);
-      ctx.restore();
-    };
-    drawLayer(whole,pair.whole);
-    drawLayer(frame,pair.cut);
-  }
+  function drawFinishOverlay(ctx,images,layers,finish){if(!finish||finish==='normal')return;const whole=layers.find(l=>l.role==='backBody');const frame=layers.find(l=>l.role==='cutFrame');const finishMap={golden:{whole:'finishGoldenWhole',cut:'finishGoldenCut'},charcoal:{whole:'finishCharcoalWhole',cut:'finishCharcoalCut'},burnt:{whole:'finishCharcoalWhole',cut:'finishCharcoalCut'}};const pair=finishMap[finish];if(!pair)return;const drawLayer=(target,assetId)=>{if(!target||!assetId)return;const img=images[assetId];if(!img)return;ctx.save();ctx.translate(target.x,target.y);ctx.rotate((target.rotation||0)*Math.PI/180);ctx.scale(target.flipX?-1:1,1);ctx.globalAlpha=(target.alpha==null?1:Number(target.alpha));const w=img.width*target.scale,h=img.height*target.scale;ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();};drawLayer(whole,pair.whole);drawLayer(frame,pair.cut);}
   function renderDish(ctx,images,state,options={}){ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);if(options.backgroundFill){ctx.fillStyle=options.backgroundFill;ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);}const mask=state.mask||createDefaultMask();const layers=[...(state.layers||[])].filter(l=>l.visible!==false).sort((a,b)=>a.z-b.z);for(const l of layers){const d=()=>drawImageAsset(ctx,images,l);if(l.clip){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,0,Math.PI*2);ctx.clip();ctx.translate(-mask.x,-mask.y);d();ctx.restore();}else d();}drawFinishOverlay(ctx,images,layers,state.recipe?.finish);if(options.showMask){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.strokeStyle='#2563eb';ctx.setLineDash([9,7]);ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,0,Math.PI*2);ctx.stroke();ctx.restore();}}
   async function loadDefaultImages(loader){const o={};for(const d of Object.values(assetMap))o[d.id]=await loader(d.src);return o;}
   function makeThumbCanvas(img,w=100,h=68){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const r=Math.min((w-8)/img.width,(h-8)/img.height);const dw=img.width*r,dh=img.height*r;x.drawImage(img,(w-dw)/2,(h-dh)/2,dw,dh);return c;}
