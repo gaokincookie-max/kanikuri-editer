@@ -1,232 +1,73 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>カニ・クリーム・コロッケ 焼き加減エディタ v14</title>
-<style>
-:root{--bg:#f7f3ee;--panel:#fffdfb;--line:#2d241d;--muted:#79685b;--accent:#d95f43;--accent2:#f0b54a}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#eef8ff,#f7f3ee 40%);font-family:"Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;color:var(--line)}
-.header{padding:16px 18px;border-bottom:3px solid #241d17;background:#fff8f1;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.header h1{margin:0;font-size:22px}.header .sub{font-size:12px;color:var(--muted);font-weight:700}
-.layout{display:grid;grid-template-columns:320px 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}.panel{background:var(--panel);border:3px solid var(--line);border-radius:18px;box-shadow:0 5px 0 rgba(45,36,29,.12)}
-.sidebar{padding:14px;display:flex;flex-direction:column;gap:14px}.section{padding:12px;border:2px solid #dfd2c3;border-radius:14px;background:#fff}.section h2{margin:0 0 10px;font-size:15px}.control{display:grid;gap:6px;margin-bottom:10px}.control:last-child{margin-bottom:0}.control label{font-size:12px;font-weight:900;color:#4d3f33}.control .small{font-size:11px;color:var(--muted)}
-select,input[type=range],input[type=number],textarea{width:100%;padding:8px 10px;border:2px solid #ccb8a6;border-radius:10px;background:#fff;font:inherit}textarea{min-height:90px;resize:vertical}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{appearance:none;border:0;border-radius:12px;padding:11px 12px;font-weight:1000;cursor:pointer}.btn.primary{background:var(--accent);color:#fff}.btn.alt{background:#f1e6d8;color:var(--line)}.btn:active{transform:translateY(1px)}
-.main{padding:16px;display:grid;gap:14px}.previewWrap{padding:12px;background:#fff;border:2px solid #dfd2c3;border-radius:16px}.previewHead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}.previewHead h2{margin:0;font-size:18px}.previewHead .status{font-size:12px;color:var(--muted);font-weight:700}.canvasBox{aspect-ratio:4/3;background:linear-gradient(180deg,#fefefe,#f3f0ec);border-radius:16px;border:2px dashed #d7c7b8;display:grid;place-items:center;overflow:hidden}.canvasBox canvas{width:100%;height:100%}
-.note{font-size:12px;line-height:1.55;color:#56493f}.assetGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}.assetCard{border:2px solid #dfd2c3;border-radius:14px;background:#fff;padding:8px}.assetCard b{display:block;font-size:12px;margin:0 0 6px}.assetCard img{display:block;width:100%;height:100px;object-fit:contain;background:linear-gradient(180deg,#fafafa,#f3f3f3);border-radius:10px}
-.codeBox{font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;word-break:break-all}
-@media (max-width:980px){.layout{grid-template-columns:1fr}.sidebar{order:2}.main{order:1}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>カニ料理プレビューエディタ v14</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="header">
-  <div>
-    <h1>カニ・クリーム・コロッケ 焼き加減エディタ v14</h1>
-    <div class="sub">焦げオーバーレイ素材を取り込み済み。パターン側で焼き加減を切り替えできます。</div>
-  </div>
-  <div class="sub">今回追加ソース: コロッケ衣オーバーレイ素材シート</div>
-</header>
-<div class="layout">
-  <aside class="panel sidebar">
-    <section class="section">
-      <h2>パターン設定</h2>
-      <div class="control">
-        <label for="sauceSel">ベースのクリーム / 液体</label>
-        <select id="sauceSel"></select>
-      </div>
-      <div class="control">
-        <label for="mainSel">具材</label>
-        <select id="mainSel"></select>
-      </div>
-      <div class="control">
-        <label for="browningSel">焼き加減</label>
-        <select id="browningSel">
-          <option value="normal">通常</option>
-          <option value="golden">奇跡の火入れ</option>
-          <option value="burnt">香ばしい焦げ</option>
-          <option value="charcoal">真っ黒焦げ</option>
-        </select>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2>オーバーレイ調整</h2>
-      <div class="control">
-        <label for="wholeAlpha">全体コロッケの透明度</label>
-        <input id="wholeAlpha" type="range" min="0" max="100" value="62">
-        <div class="small"><span id="wholeAlphaVal">62</span>%</div>
-      </div>
-      <div class="control">
-        <label for="cutAlpha">断面コロッケの透明度</label>
-        <input id="cutAlpha" type="range" min="0" max="100" value="62">
-        <div class="small"><span id="cutAlphaVal">62</span>%</div>
-      </div>
-      <div class="control">
-        <label for="wholeScale">全体コロッケ倍率</label>
-        <input id="wholeScale" type="range" min="70" max="130" value="100">
-        <div class="small"><span id="wholeScaleVal">100</span>%</div>
-      </div>
-      <div class="control">
-        <label for="cutScale">断面コロッケ倍率</label>
-        <input id="cutScale" type="range" min="70" max="130" value="100">
-        <div class="small"><span id="cutScaleVal">100</span>%</div>
-      </div>
-      <div class="note">通常を選ぶとオーバーレイは無効になります。奇跡・焦げ・黒焦げは、ここで透明度を調整しながら見た目を詰められます。</div>
-    </section>
-
-    <section class="section">
-      <h2>設定の保存 / 読み込み</h2>
-      <div class="btns" style="margin-bottom:8px">
-        <button class="btn primary" id="exportBtn">JSONを書き出し</button>
-        <button class="btn alt" id="copyBtn">JSONをコピー</button>
-      </div>
-      <div class="control">
-        <label for="jsonBox">現在設定JSON</label>
-        <textarea id="jsonBox"></textarea>
-      </div>
-      <div class="btns">
-        <button class="btn alt" id="applyBtn">JSONを適用</button>
-        <button class="btn alt" id="resetBtn">初期値へ戻す</button>
-      </div>
-    </section>
-  </aside>
-
-  <main class="panel main">
-    <section class="previewWrap">
-      <div class="previewHead">
-        <div>
-          <h2>料理プレビュー</h2>
-          <div class="status" id="statusText">読み込み中…</div>
+  <div class="app">
+    <aside class="sidebar">
+      <h1>カニ料理プレビューエディタ <span>v14</span></h1>
+      <div class="panel">
+        <h2>テンプレート</h2>
+        <label>プロジェクト<select id="templateSelect"></select></label>
+        <div class="row2">
+          <button id="loadProjectBtn">JSON読込</button>
+          <button id="loadLayoutBtn">レイアウト読込</button>
         </div>
-        <div class="status">plate + whole + cut + sauce + main + burn overlay</div>
       </div>
-      <div class="canvasBox"><canvas id="preview" width="1200" height="900"></canvas></div>
-    </section>
-
-    <section class="section">
-      <h2>今回取り込んだ焦げ素材</h2>
-      <div class="assetGrid" id="overlayGrid"></div>
-    </section>
-
-    <section class="section">
-      <h2>メモ</h2>
-      <div class="note">
-        - 焼き加減は <b>通常 / 奇跡の火入れ / 香ばしい焦げ / 真っ黒焦げ</b> の4段階で切り替えできます。<br>
-        - オーバーレイ素材は <code>source/コロッケ衣オーバーレイ素材シート.png</code> と、切り出した <code>assets/overlays/</code> の両方を同梱しています。<br>
-        - 今回は焦げ調整に集中しやすいよう、パターンプレビューを軽量構成でまとめています。
+      <div class="panel">
+        <h2>パターン</h2>
+        <label>ソース<select id="sauceSelect"></select></label>
+        <label>具材<select id="mainSelect"></select></label>
+        <label>焼き加減<select id="burnSelect"></select></label>
+        <label>焦げオーバーレイ透明度 <input id="burnAlpha" type="range" min="0" max="100" value="70"></label>
+        <div class="smallVal" id="burnAlphaValue">70%</div>
+        <div class="checks">
+          <label><input id="legsToggle" type="checkbox">足</label>
+          <label><input id="glassesToggle" type="checkbox">グラサン</label>
+          <label><input id="headphonesToggle" type="checkbox">ヘッドホン</label>
+          <label><input id="steamToggle" type="checkbox">湯気</label>
+          <label><input id="sparkleToggle" type="checkbox">キラキラ</label>
+        </div>
       </div>
-    </section>
-  </main>
-</div>
-<script>
-const SAUCES=[
-  {id:'cream', label:'クリーム', src:'assets/sauces/cream.png'},
-  {id:'gray', label:'灰色クリーム', src:'assets/sauces/gray.png'},
-  {id:'swirl', label:'黄クリーム', src:'assets/sauces/swirl.png'},
-  {id:'dotted', label:'粒入りホワイト', src:'assets/sauces/dotted.png'},
-  {id:'purple_boba', label:'紫つぶつぶ', src:'assets/sauces/purple_boba.png'},
-  {id:'white_bumpy', label:'白つぶつぶ', src:'assets/sauces/white_bumpy.png'},
-  {id:'plain_white', label:'プレーン白', src:'assets/sauces/plain_white.png'},
-  {id:'pale_yellow', label:'淡い黄色', src:'assets/sauces/pale_yellow.png'},
-];
-const MAINS=[
-  {id:'crab_shred', label:'ほぐしカニ', src:'assets/mains/crab_shred.png'},
-  {id:'kanikama_cube', label:'カニカマ角切り', src:'assets/mains/kanikama_cube.png'},
-  {id:'kombu', label:'昆布', src:'assets/mains/kombu.png'},
-  {id:'starfish', label:'ヒトデ', src:'assets/mains/starfish.png'},
-  {id:'boots', label:'長靴', src:'assets/mains/boots.png'},
-  {id:'gloves', label:'手袋', src:'assets/mains/gloves.png'},
-  {id:'crab_bits', label:'カニ身ごろごろ', src:'assets/mains/crab_bits.png'},
-];
-const OVERLAYS={
-  golden:{whole:'assets/overlays/whole_golden.png',cut:'assets/overlays/cut_golden.png',label:'奇跡の火入れ'},
-  burnt:{whole:'assets/overlays/whole_burnt.png',cut:'assets/overlays/cut_burnt.png',label:'香ばしい焦げ'},
-  charcoal:{whole:'assets/overlays/whole_charcoal.png',cut:'assets/overlays/cut_charcoal.png',label:'真っ黒焦げ'},
-};
-const BASE={plate:'assets/base/plate.png',whole:'assets/base/whole.png',cut:'assets/base/cut.png'};
-const DEFAULTS={sauce:'cream',main:'crab_shred',browning:'golden',wholeAlpha:62,cutAlpha:62,wholeScale:100,cutScale:100};
-const state={...DEFAULTS};
-const els={
-  preview:document.getElementById('preview'), status:document.getElementById('statusText'),
-  sauceSel:document.getElementById('sauceSel'), mainSel:document.getElementById('mainSel'), browningSel:document.getElementById('browningSel'),
-  wholeAlpha:document.getElementById('wholeAlpha'), cutAlpha:document.getElementById('cutAlpha'),
-  wholeScale:document.getElementById('wholeScale'), cutScale:document.getElementById('cutScale'),
-  wholeAlphaVal:document.getElementById('wholeAlphaVal'), cutAlphaVal:document.getElementById('cutAlphaVal'),
-  wholeScaleVal:document.getElementById('wholeScaleVal'), cutScaleVal:document.getElementById('cutScaleVal'),
-  jsonBox:document.getElementById('jsonBox'), overlayGrid:document.getElementById('overlayGrid')
-};
-const ctx=els.preview.getContext('2d');
-const imageCache={};
-function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
-async function preload(){
-  const srcs=[BASE.plate,BASE.whole,BASE.cut,...SAUCES.map(x=>x.src),...MAINS.map(x=>x.src),...Object.values(OVERLAYS).flatMap(x=>[x.whole,x.cut])];
-  for(const src of srcs){imageCache[src]=await loadImage(src);}
-}
-function optionFill(select,list){select.innerHTML=list.map(x=>`<option value="${x.id}">${x.label}</option>`).join('');}
-function selected(list,id){return list.find(x=>x.id===id)||list[0];}
-function drawFit(img,x,y,w,h,alpha=1){ctx.save();ctx.globalAlpha=alpha;const s=Math.min(w/img.width,h/img.height);const iw=img.width*s, ih=img.height*s;ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);ctx.restore();}
-function render(){
-  ctx.clearRect(0,0,els.preview.width,els.preview.height);
-  ctx.fillStyle='#f7f1ea'; ctx.fillRect(0,0,els.preview.width,els.preview.height);
-  // soft background vignette
-  const g=ctx.createLinearGradient(0,0,0,els.preview.height); g.addColorStop(0,'#ffffff'); g.addColorStop(1,'#f2eee9'); ctx.fillStyle=g; ctx.fillRect(0,0,els.preview.width,els.preview.height);
-  const plate=imageCache[BASE.plate], whole=imageCache[BASE.whole], cut=imageCache[BASE.cut];
-  const sauce=selected(SAUCES,state.sauce), main=selected(MAINS,state.main);
-  // dish layout
-  drawFit(plate,120,445,960,280,1);
-  // back whole croquette
-  const wholeW=390*(state.wholeScale/100), wholeH=255*(state.wholeScale/100);
-  drawFit(whole,650,240,wholeW,wholeH,1);
-  // front cut sauce and main behind cut frame
-  const cutW=510*(state.cutScale/100), cutH=310*(state.cutScale/100);
-  const cutX=155, cutY=265;
-  drawFit(imageCache[sauce.src], cutX+210, cutY+52, 170*(state.cutScale/100), 155*(state.cutScale/100), 1);
-  drawFit(imageCache[main.src], cutX+170, cutY+86, 225*(state.cutScale/100), 120*(state.cutScale/100), 1);
-  drawFit(cut, cutX, cutY, cutW, cutH, 1);
-  // overlays
-  if(state.browning!=='normal'){
-    const ov=OVERLAYS[state.browning];
-    drawFit(imageCache[ov.whole],650,240,wholeW,wholeH,state.wholeAlpha/100);
-    drawFit(imageCache[ov.cut],cutX,cutY,cutW,cutH,state.cutAlpha/100);
-  }
-  // label chip
-  ctx.save();
-  ctx.fillStyle='rgba(255,248,240,.96)';roundRect(ctx,28,24,360,74,18);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#2d241d';ctx.stroke();
-  ctx.fillStyle='#2d241d'; ctx.font='900 24px sans-serif'; ctx.fillText(`${selected(main?MAINS:[],state.main).label} × ${selected(SAUCES,state.sauce).label}`,48,56);
-  ctx.fillStyle='#6d5d51'; ctx.font='700 18px sans-serif'; const bLabel=state.browning==='normal'?'通常':OVERLAYS[state.browning].label; ctx.fillText(`焼き加減: ${bLabel}`,48,85);
-  ctx.restore();
-  els.status.textContent=`${selected(MAINS,state.main).label} / ${selected(SAUCES,state.sauce).label} / ${state.browning==='normal'?'通常':OVERLAYS[state.browning].label}`;
-  syncJsonBox();
-}
-function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
-function syncJsonBox(){els.jsonBox.value=JSON.stringify(state,null,2);}
-function bind(){
-  optionFill(els.sauceSel,SAUCES); optionFill(els.mainSel,MAINS);
-  els.sauceSel.value=state.sauce; els.mainSel.value=state.main; els.browningSel.value=state.browning;
-  for(const k of ['wholeAlpha','cutAlpha','wholeScale','cutScale']){els[k].value=state[k]; document.getElementById(k+'Val').textContent=state[k];}
-  els.sauceSel.onchange=()=>{state.sauce=els.sauceSel.value;render();};
-  els.mainSel.onchange=()=>{state.main=els.mainSel.value;render();};
-  els.browningSel.onchange=()=>{state.browning=els.browningSel.value;render();};
-  for(const k of ['wholeAlpha','cutAlpha','wholeScale','cutScale']){
-    els[k].oninput=()=>{state[k]=Number(els[k].value);document.getElementById(k+'Val').textContent=state[k];render();};
-  }
-  document.getElementById('resetBtn').onclick=()=>{Object.assign(state,DEFAULTS); bind(); render();};
-  document.getElementById('applyBtn').onclick=()=>{try{const data=JSON.parse(els.jsonBox.value);Object.assign(state,DEFAULTS,data);bind();render();}catch(e){alert('JSONの形式が不正です。');}};
-  document.getElementById('copyBtn').onclick=async()=>{syncJsonBox(); try{await navigator.clipboard.writeText(els.jsonBox.value); alert('JSONをコピーしました。');}catch(e){alert('コピーできませんでした。');}};
-  document.getElementById('exportBtn').onclick=()=>{syncJsonBox(); const blob=new Blob([els.jsonBox.value],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='kani-browning-pattern.json'; a.click(); URL.revokeObjectURL(a.href); };
-  // overlay cards
-  els.overlayGrid.innerHTML='';
-  for(const [id,def] of Object.entries(OVERLAYS)){
-    for(const type of ['whole','cut']){
-      const div=document.createElement('div'); div.className='assetCard';
-      div.innerHTML=`<b>${def.label} / ${type==='whole'?'全体':'断面'}</b><img src="${def[type]}" alt="${def.label}">`;
-      els.overlayGrid.appendChild(div);
-    }
-  }
-}
-(async function(){
-  try{await preload(); bind(); render();}catch(err){console.error(err); els.status.textContent='画像の読み込みに失敗しました。';}
-})();
-</script>
+      <div class="panel">
+        <h2>焼き素材メモ</h2>
+        <p>今回追加した焦げ素材は、<b>焼き加減</b>から切り替えできます。透明度は上のスライダーで調整できます。</p>
+        <ul>
+          <li>奇跡の火入れ</li>
+          <li>香ばしい焦げ</li>
+          <li>真っ黒焦げ</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>書き出し</h2>
+        <div class="row2">
+          <button id="saveLayoutBtn">レイアウト保存</button>
+          <button id="saveProjectBtn">プロジェクト保存</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>素材</h2>
+        <details>
+          <summary>追加した焼き素材シート</summary>
+          <img class="sheetPreview" src="assets/overlays/overlay_sheet.png" alt="焦げ素材シート">
+        </details>
+      </div>
+      <input id="hiddenFile" type="file" accept=".json,application/json" hidden>
+    </aside>
+    <main class="main">
+      <div class="toolbar">
+        <span>プレビュー</span>
+        <div class="legend">※ 今回は焼き加減切替に対応した版です</div>
+      </div>
+      <div class="canvasWrap">
+        <canvas id="preview" width="760" height="760"></canvas>
+      </div>
+    </main>
+  </div>
+  <script src="app.js"></script>
 </body>
 </html>
