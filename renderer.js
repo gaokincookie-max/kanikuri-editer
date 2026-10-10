@@ -72,8 +72,31 @@
     return out;
   }
   function drawImageAsset(ctx,images,l){const img=images[l.assetId];if(!img)return;ctx.save();ctx.translate(l.x,l.y);ctx.rotate((l.rotation||0)*Math.PI/180);ctx.scale(l.flipX?-1:1,1);ctx.globalAlpha=l.alpha??1;const w=img.width*l.scale,h=img.height*l.scale;ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();}
-  function drawFinishOverlay(ctx,images,layers,finish){if(!finish||finish==='normal')return;const whole=layers.find(l=>l.role==='backBody');const frame=layers.find(l=>l.role==='cutFrame');const finishMap={golden:{whole:'finishGoldenWhole',cut:'finishGoldenCut'},charcoal:{whole:'finishCharcoalWhole',cut:'finishCharcoalCut'},burnt:{whole:'finishCharcoalWhole',cut:'finishCharcoalCut'}};const pair=finishMap[finish];if(!pair)return;const drawLayer=(target,assetId)=>{if(!target||!assetId)return;const img=images[assetId];if(!img)return;ctx.save();ctx.translate(target.x,target.y);ctx.rotate((target.rotation||0)*Math.PI/180);ctx.scale(target.flipX?-1:1,1);ctx.globalAlpha=(target.alpha==null?1:Number(target.alpha));const w=img.width*target.scale,h=img.height*target.scale;ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();};drawLayer(whole,pair.whole);drawLayer(frame,pair.cut);}
-  function renderDish(ctx,images,state,options={}){ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);if(options.backgroundFill){ctx.fillStyle=options.backgroundFill;ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);}const mask=state.mask||createDefaultMask();const layers=[...(state.layers||[])].filter(l=>l.visible!==false).sort((a,b)=>a.z-b.z);for(const l of layers){const d=()=>drawImageAsset(ctx,images,l);if(l.clip){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,0,Math.PI*2);ctx.clip();ctx.translate(-mask.x,-mask.y);d();ctx.restore();}else d();}drawFinishOverlay(ctx,images,layers,state.recipe?.finish);if(options.showMask){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.strokeStyle='#2563eb';ctx.setLineDash([9,7]);ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,0,Math.PI*2);ctx.stroke();ctx.restore();}}
+  // 焼き加減は元画像に重ねず、対応するレイヤーの画像IDを切り替える。
+  // これによりz順・縮尺・回転・座標・透明度が通常時と完全に一致する。
+  const finishAssets={
+    golden:{whole:'finishGoldenWhole',cutFrame:'finishGoldenCut'},
+    charcoal:{whole:'finishCharcoalWhole',cutFrame:'finishCharcoalCut'},
+    burnt:{whole:'finishCharcoalWhole',cutFrame:'finishCharcoalCut'}
+  };
+  function renderDish(ctx,images,state,options={}){
+    ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    if(options.backgroundFill){ctx.fillStyle=options.backgroundFill;ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);}
+    const mask=state.mask||createDefaultMask();
+    const selected=finishAssets[state.recipe?.finish]||null;
+    const layers=[...(state.layers||[])].filter(l=>l.visible!==false).sort((a,b)=>a.z-b.z);
+    for(const l of layers){
+      let assetId=l.assetId;
+      // 奥の本体・手前の断面を、それぞれ同寸法の専用素材に置き換える。
+      // 追加レイヤー・皿・具材・液体・アクセサリには影響しない。
+      if(selected && l.role==='backBody' && l.assetId==='whole')assetId=selected.whole;
+      else if(selected && l.role==='cutFrame' && l.assetId==='cutFrame')assetId=selected.cutFrame;
+      const d=()=>drawImageAsset(ctx,images,{...l,assetId});
+      if(l.clip){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,0,Math.PI*2);ctx.clip();ctx.translate(-mask.x,-mask.y);d();ctx.restore();}
+      else d();
+    }
+    if(options.showMask){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.strokeStyle='#2563eb';ctx.setLineDash([9,7]);ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,Math.PI*2);ctx.stroke();ctx.restore();}
+  }
   async function loadDefaultImages(loader){const o={};for(const d of Object.values(assetMap))o[d.id]=await loader(d.src);return o;}
   function makeThumbCanvas(img,w=100,h=68){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const r=Math.min((w-8)/img.width,(h-8)/img.height);const dw=img.width*r,dh=img.height*r;x.drawImage(img,(w-dw)/2,(h-dh)/2,dw,dh);return c;}
   global.KaniDishRenderer={defs,assetMap,defaultRecipe,defaultMask,defaultSlots,createDefaultMask,createDefaultSlots,normalizeRecipe,buildRecipeLayers,renderDish,loadDefaultImages,makeThumbCanvas};
