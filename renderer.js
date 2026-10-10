@@ -10,11 +10,7 @@
       {id:'glasses',name:'グラサン',src:'assets/dishgen/glasses.png',cat:'extra'},
       {id:'headphones',name:'ヘッドホン',src:'assets/dishgen/headphones.png',cat:'extra'},
       {id:'steam',name:'湯気',src:'assets/dishgen/steam.png',cat:'extra'},
-      {id:'sparkle',name:'キラキラ',src:'assets/dishgen/sparkle.png',cat:'extra'},
-      {id:'finishGoldenWhole',name:'焼き(全体/奇跡の火入れ)',src:'assets/dishgen/finish/golden_whole.png',cat:'finish'},
-      {id:'finishGoldenCut',name:'焼き(断面/奇跡の火入れ)',src:'assets/dishgen/finish/golden_cut.png',cat:'finish'},
-      {id:'finishCharcoalWhole',name:'焼き(全体/黒焦げ)',src:'assets/dishgen/finish/charcoal_whole.png',cat:'finish'},
-      {id:'finishCharcoalCut',name:'焼き(断面/黒焦げ)',src:'assets/dishgen/finish/charcoal_cut.png',cat:'finish'}
+      {id:'sparkle',name:'キラキラ',src:'assets/dishgen/sparkle.png',cat:'extra'}
     ],
     sauces:[
       {id:'cream',name:'クリーム',src:'assets/dishgen/cream.png',cat:'sauce'},
@@ -72,26 +68,45 @@
     return out;
   }
   function drawImageAsset(ctx,images,l){const img=images[l.assetId];if(!img)return;ctx.save();ctx.translate(l.x,l.y);ctx.rotate((l.rotation||0)*Math.PI/180);ctx.scale(l.flipX?-1:1,1);ctx.globalAlpha=l.alpha??1;const w=img.width*l.scale,h=img.height*l.scale;ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();}
-  // 焼き加減は元画像に重ねず、対応するレイヤーの画像IDを切り替える。
-  // これによりz順・縮尺・回転・座標・透明度が通常時と完全に一致する。
-  const finishAssets={
-    golden:{whole:'finishGoldenWhole',cutFrame:'finishGoldenCut'},
-    charcoal:{whole:'finishCharcoalWhole',cutFrame:'finishCharcoalCut'},
-    burnt:{whole:'finishCharcoalWhole',cutFrame:'finishCharcoalCut'}
-  };
+  // Create a color-treated image from the *active* source asset (including project overrides).
+  // Never overlay old cutFrame.png: the saved project uses a different, clean 531x324 cutFrame.
+  const finishCache=new WeakMap();
+  function finishedImage(source,mode){
+    if(!source||mode==='normal')return source;
+    let cache=finishCache.get(source);
+    if(!cache){cache={};finishCache.set(source,cache);}
+    if(cache[mode])return cache[mode];
+    const cv=document.createElement('canvas');cv.width=source.naturalWidth||source.width;cv.height=source.naturalHeight||source.height;
+    const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(source,0,0);
+    const img=x.getImageData(0,0,cv.width,cv.height),d=img.data;
+    for(let i=0;i<d.length;i+=4){
+      if(!d[i+3])continue;
+      const r=d[i],g=d[i+1],b=d[i+2];
+      if(mode==='charcoal'){
+        // Dark carbonized crumbs; preserve highlights and the cream-colored cross section.
+        const pale=r>165 && g>108 && (r-g)<90 && (g-b)<92;
+        if(pale){d[i]=Math.round(r*.91);d[i+1]=Math.round(g*.86);d[i+2]=Math.round(b*.79);}
+        else {const lum=.25*r+.64*g+.11*b;d[i]=Math.max(20,Math.min(130,Math.round(lum*.43+22)));d[i+1]=Math.max(11,Math.min(83,Math.round(lum*.24+10)));d[i+2]=Math.max(9,Math.min(64,Math.round(lum*.20+9)));}
+      }else if(mode==='golden'){
+        // Preserve existing surface shading, brighten breadcrumb highlights.
+        d[i]=Math.min(255,Math.round(r*1.04+9));
+        d[i+1]=Math.min(255,Math.round(g*1.13+9));
+        d[i+2]=Math.min(255,Math.round(b*.89+4));
+      }
+    }
+    x.putImageData(img,0,0);cache[mode]=cv;return cv;
+  }
   function renderDish(ctx,images,state,options={}){
     ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
     if(options.backgroundFill){ctx.fillStyle=options.backgroundFill;ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);}
     const mask=state.mask||createDefaultMask();
-    const selected=finishAssets[state.recipe?.finish]||null;
+    const finish=state.recipe?.finish==='burnt'?'charcoal':state.recipe?.finish;
     const layers=[...(state.layers||[])].filter(l=>l.visible!==false).sort((a,b)=>a.z-b.z);
     for(const l of layers){
-      let assetId=l.assetId;
-      // 奥の本体・手前の断面を、それぞれ同寸法の専用素材に置き換える。
-      // 追加レイヤー・皿・具材・液体・アクセサリには影響しない。
-      if(selected && l.role==='backBody' && l.assetId==='whole')assetId=selected.whole;
-      else if(selected && l.role==='cutFrame' && l.assetId==='cutFrame')assetId=selected.cutFrame;
-      const d=()=>drawImageAsset(ctx,images,{...l,assetId});
+      const active=images[l.assetId];
+      const colorize=finish && finish!=='normal' && (l.role==='backBody'||l.role==='cutFrame') && (l.assetId==='whole'||l.assetId==='cutFrame');
+      const source=colorize?finishedImage(active,finish):active;
+      const d=()=>drawImageAsset(ctx,{[l.assetId]:source},l);
       if(l.clip){ctx.save();ctx.translate(mask.x,mask.y);ctx.rotate(mask.rotation||0);ctx.beginPath();ctx.ellipse(0,0,mask.rx,mask.ry,0,0,Math.PI*2);ctx.clip();ctx.translate(-mask.x,-mask.y);d();ctx.restore();}
       else d();
     }
